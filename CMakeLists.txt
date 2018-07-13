@@ -17,13 +17,4 @@ src/SerialSimulationDataGenerator.cpp
 src/SerialSimulationDataGenerator.h
 )
 
-add_library(serial_analyzer SHARED ${SOURCES})
-target_link_libraries(serial_analyzer PRIVATE Saleae::AnalyzerSDK)
-
-if(MSVC)
-    install(TARGETS serial_analyzer RUNTIME DESTINATION "Analyzers")
-else()
-    install(TARGETS serial_analyzer LIBRARY DESTINATION "Analyzers")
-endif()
-
-set_post_build_destination(serial_analyzer)
+add_analyzer_plugin(serial_analyzer SOURCES ${SOURCES})

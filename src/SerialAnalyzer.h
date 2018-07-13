@@ -6,7 +6,7 @@
 #include "SerialSimulationDataGenerator.h"
 
 class SerialAnalyzerSettings;
-class ANALYZER_EXPORT SerialAnalyzer : public Analyzer2
+class SerialAnalyzer : public Analyzer2
 {
 public:
 	SerialAnalyzer();
