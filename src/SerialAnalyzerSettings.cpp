@@ -18,7 +18,7 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 	mSerialMode( SerialAnalyzerEnums::Normal )
 {
 	mInputChannelInterface.reset( new AnalyzerSettingInterfaceChannel() );
-	mInputChannelInterface->SetTitleAndTooltip( "Serial", "Standard Async Serial" );
+	mInputChannelInterface->SetTitleAndTooltip( "Input Channel", "Standard Async Serial" );
 	mInputChannelInterface->SetChannel( mInputChannel );
 
 	mBitRateInterface.reset( new AnalyzerSettingInterfaceInteger() );
@@ -33,7 +33,7 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 	mUseAutobaudInterface->SetValue( mUseAutobaud );
 
 	mBitsPerTransferInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mBitsPerTransferInterface->SetTitleAndTooltip( "", "Select the number of bits per frame" ); 
+	mBitsPerTransferInterface->SetTitleAndTooltip( "Bits per Frame", "Select the number of bits per frame" ); 
 	for( U32 i = 1; i <= 64; i++ )
 	{
 		std::stringstream ss; 
@@ -52,7 +52,7 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 
 
 	mStopBitsInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mStopBitsInterface->SetTitleAndTooltip( "", "Specify the number of stop bits." );
+	mStopBitsInterface->SetTitleAndTooltip( "Stop Bits", "Specify the number of stop bits." );
 	mStopBitsInterface->AddNumber( 1.0, "1 Stop Bit (Standard)", "" );
 	mStopBitsInterface->AddNumber( 1.5, "1.5 Stop Bits", "" );
 	mStopBitsInterface->AddNumber( 2.0, "2 Stop Bits", "" );
@@ -60,7 +60,7 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 
 
 	mParityInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mParityInterface->SetTitleAndTooltip( "", "Specify None, Even, or Odd Parity." );
+	mParityInterface->SetTitleAndTooltip( "Parity Bit", "Specify None, Even, or Odd Parity." );
 	mParityInterface->AddNumber( AnalyzerEnums::None, "No Parity Bit (Standard)", "" );
 	mParityInterface->AddNumber( AnalyzerEnums::Even, "Even Parity Bit", "" );
 	mParityInterface->AddNumber( AnalyzerEnums::Odd, "Odd Parity Bit", "" ); 
@@ -68,22 +68,22 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 
 
 	mShiftOrderInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mShiftOrderInterface->SetTitleAndTooltip( "", "Select if the most significant bit or least significant bit is transmitted first" );
+	mShiftOrderInterface->SetTitleAndTooltip( "Significant Bit", "Select if the most significant bit or least significant bit is transmitted first" );
 	mShiftOrderInterface->AddNumber( AnalyzerEnums::LsbFirst, "Least Significant Bit Sent First (Standard)", "" );
 	mShiftOrderInterface->AddNumber( AnalyzerEnums::MsbFirst, "Most Significant Bit Sent First", "" );
 	mShiftOrderInterface->SetNumber( mShiftOrder );
 
 
 	mInvertedInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mInvertedInterface->SetTitleAndTooltip( "", "Specify if the serial signal is inverted" );
+	mInvertedInterface->SetTitleAndTooltip( "Signal inversion", "Specify if the serial signal is inverted" );
 	mInvertedInterface->AddNumber( false, "Non Inverted (Standard)", "" );
 	mInvertedInterface->AddNumber( true, "Inverted", "" );
 
 	mInvertedInterface->SetNumber( mInverted );enum Mode { Normal, MpModeRightZeroMeansAddress, MpModeRightOneMeansAddress, MpModeLeftZeroMeansAddress, MpModeLeftOneMeansAddress };
 
 	mSerialModeInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mSerialModeInterface->SetTitleAndTooltip( "Special Mode", "Specify if this is normal, or MP serial (aka multi-drop, MP, multi-processor, 9-bit serial)" );
-	mSerialModeInterface->AddNumber( SerialAnalyzerEnums::Normal, "None", "" );
+	mSerialModeInterface->SetTitleAndTooltip( "Mode", "Specify if this is normal, or MP serial (aka multi-drop, MP, multi-processor, 9-bit serial)" );
+	mSerialModeInterface->AddNumber( SerialAnalyzerEnums::Normal, "Normal", "" );
 	mSerialModeInterface->AddNumber( SerialAnalyzerEnums::MpModeMsbZeroMeansAddress, "MP Mode: Address indicated by MSB=0", "(aka MP, multi-processor, 9-bit serial)" );
 	mSerialModeInterface->AddNumber( SerialAnalyzerEnums::MpModeMsbOneMeansAddress, "MDB Mode: Address indicated by MSB=1", "(aka multi-drop, 9-bit serial)" );
 	mSerialModeInterface->SetNumber( mSerialMode );
