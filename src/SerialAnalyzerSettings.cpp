@@ -82,10 +82,10 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 	mInvertedInterface->SetNumber( mInverted );enum Mode { Normal, MpModeRightZeroMeansAddress, MpModeRightOneMeansAddress, MpModeLeftZeroMeansAddress, MpModeLeftOneMeansAddress };
 
 	mSerialModeInterface.reset( new AnalyzerSettingInterfaceNumberList() );
-	mSerialModeInterface->SetTitleAndTooltip( "Mode", "Specify if this is normal, or MP serial (aka multi-drop, MP, multi-processor, 9-bit serial)" );
+	mSerialModeInterface->SetTitleAndTooltip( "Mode", "" );
 	mSerialModeInterface->AddNumber( SerialAnalyzerEnums::Normal, "Normal", "" );
-	mSerialModeInterface->AddNumber( SerialAnalyzerEnums::MpModeMsbZeroMeansAddress, "MP Mode: Address indicated by MSB=0", "(aka MP, multi-processor, 9-bit serial)" );
-	mSerialModeInterface->AddNumber( SerialAnalyzerEnums::MpModeMsbOneMeansAddress, "MDB Mode: Address indicated by MSB=1", "(aka multi-drop, 9-bit serial)" );
+	mSerialModeInterface->AddNumber( SerialAnalyzerEnums::MpModeMsbZeroMeansAddress, "MP - Address indicated by MSB=0", "Multi-processor, 9-bit serial" );
+	mSerialModeInterface->AddNumber( SerialAnalyzerEnums::MpModeMsbOneMeansAddress, "MDB - Address indicated by MSB=1 (TX only)", "Multi-drop, 9-bit serial" );
 	mSerialModeInterface->SetNumber( mSerialMode );
 
 	AddInterface( mInputChannelInterface.get() );
