@@ -90,7 +90,6 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 
 	AddInterface( mInputChannelInterface.get() );
 	AddInterface( mBitRateInterface.get() );
-	AddInterface( mUseAutobaudInterface.get() );
 	AddInterface( mBitsPerTransferInterface.get() );
 	AddInterface( mStopBitsInterface.get() );
 	AddInterface( mParityInterface.get() );
