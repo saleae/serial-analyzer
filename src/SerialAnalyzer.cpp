@@ -233,6 +233,9 @@ void SerialAnalyzer::WorkerThread()
 
         FrameV2 framev2;
         framev2.AddInteger( "value", data );
+        framev2.AddBoolean( "parity_error", parity_error );
+        framev2.AddBoolean( "framing_error", framing_error );
+        framev2.AddBoolean( "address", mp_is_address );
         mResults->AddFrameV2( framev2, "data", frame_starting_sample, mSerial->GetSampleNumber() );
 
         mResults->CommitResults();
