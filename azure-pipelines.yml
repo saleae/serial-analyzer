@@ -4,16 +4,87 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+  branches:
+    include:
+      - 'master'
+      - 'azure-pipelines'
+pr:
+  - '*'
 
-pool:
-  vmImage: 'ubuntu-latest'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+jobs:
+  - job: clangFormat
+    displayName: 'clang format'
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+    - script: |
+        echo "TODO"
+  - job: build
+    pool:
+      vmImage: $(imageName)
+    strategy:
+      matrix:
+        windows:
+          imageName: 'vs2017-win2016'
+          CMAKE_ARGS: '-G "Visual Studio 15 Win64"'
+          BUILD_ARGS: '--config RelWithDebInfo'
+        linux:
+          imageName: 'ubuntu-16.04'
+          CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=RelWithDebInfo'
+          BUILD_ARGS: ''
+        mac:
+          imageName: 'macOS-10.15'
+          CMAKE_ARGS: '-DCMAKE_BUILD_TYPE=RelWithDebInfo'
+          BUILD_ARGS: ''
+    displayName: 'Build and deploy graph-io'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    steps:
+    - script: |
+        mkdir build
+        cd build
+        cmake $(CMAKE_ARGS) ..
+        cmake --build . $(BUILD_ARGS)
+      displayName: 'Build'
+
+    - script: |
+        cd build
+        install_name_tool -change @executable_path/libAnalyzer.dylib @rpath/libAnalyzer.dylib Analyzers/*.so
+      displayName: 'MacOS fix install name'
+      condition: eq( variables['Agent.OS'], 'Darwin' )
+
+    # publish internally.
+    - publish: $(System.DefaultWorkingDirectory)/build/Analyzers/RelWithDebInfo
+      artifact: AnalyzerLibWin
+      condition: eq( variables['Agent.OS'], 'Windows_NT' )
+      displayName: 'publish Windows'
+    - publish: $(System.DefaultWorkingDirectory)/build/Analyzers
+      artifact: AnalyzerLibMac
+      condition: eq( variables['Agent.OS'], 'Darwin' )
+      displayName: 'publish MacOS'
+    - publish: $(System.DefaultWorkingDirectory)/build/Analyzers
+      artifact: AnalyzerLibLinux
+      condition: eq( variables['Agent.OS'], 'Linux' )
+      displayName: 'publish Linux'
+
+  - job: deploy
+    dependsOn:
+      - build
+    displayName: 'deploy'
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+    - download: current
+      artifact: AnalyzerLibLinux
+    - download: current
+      artifact: AnalyzerLibWin
+      patterns: '*.dll'
+    - download: current
+      artifact: AnalyzerLibMac
+    - script: |
+        pwd
+        find .
+        echo $(Build.ArtifactStagingDirectory)
+        find $(Build.ArtifactStagingDirectory)
+        echo $(Pipeline.Workspace)
+        find $(Pipeline.Workspace)
