@@ -7,8 +7,8 @@
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#sep-github
 # if you don't setup a github connection, but intend to use azure CI, then you will need to disable github releases here, otherwise the build will fail.
 variables:
-  GITHUB_CONNECTION: 'github.com_Marcus10110'
-  ENABLE_GITHUB_RELEASES: 'true'
+  GITHUB_CONNECTION: 'github.com_Marcus10110B'
+  ENABLE_GITHUB_RELEASES: 'false'
 
 # trigger: always build commits to master, all commits to open pull requests, and all tags.
 trigger:
