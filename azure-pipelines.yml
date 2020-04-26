@@ -1,8 +1,16 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Configuration for automated CI building using Microsoft Azure Pipelines.
+# https://azure.microsoft.com/en-us/services/devops/pipelines/
+# This will build this analyzer for all 3 target platforms.
+# It will create github releases for tagged commits.
 
+# In order to publish releases to github, you must add a new GitHub service connection in your project settings, under Pipelines -> Service Connections.
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#sep-github
+# if you don't setup a github connection, but intend to use azure CI, then you will need to disable github releases here, otherwise the build will fail.
+variables:
+  GITHUB_CONNECTION: 'github.com_Marcus10110'
+  ENABLE_GITHUB_RELEASES: 'true'
+
+# trigger: always build commits to master, all commits to open pull requests, and all tags.
 trigger:
   branches:
     include:
@@ -13,15 +21,8 @@ trigger:
 pr:
   - '*'
 
-
+# build for MacOS, Linux, and Windows.
 jobs:
-  - job: clangFormat
-    displayName: 'clang format'
-    pool:
-      vmImage: 'ubuntu-16.04'
-    steps:
-    - script: |
-        echo "TODO"
   - job: build
     pool:
       vmImage: $(imageName)
@@ -52,23 +53,24 @@ jobs:
     - script: |
         cd build
         install_name_tool -change @executable_path/libAnalyzer.dylib @rpath/libAnalyzer.dylib Analyzers/*.so
-      displayName: 'MacOS fix install name'
+      displayName: 'MacOS: fix install name'
       condition: eq( variables['Agent.OS'], 'Darwin' )
 
-    # publish internally.
+    # this publishes to azure pipelines, so that other CI agents can load these files, later in the pipeline
     - publish: $(System.DefaultWorkingDirectory)/build/Analyzers/RelWithDebInfo
       artifact: AnalyzerLibWin
       condition: eq( variables['Agent.OS'], 'Windows_NT' )
-      displayName: 'publish Windows'
+      displayName: 'Windows: Publish'
     - publish: $(System.DefaultWorkingDirectory)/build/Analyzers
       artifact: AnalyzerLibMac
       condition: eq( variables['Agent.OS'], 'Darwin' )
-      displayName: 'publish MacOS'
+      displayName: 'MacOS: Publish'
     - publish: $(System.DefaultWorkingDirectory)/build/Analyzers
       artifact: AnalyzerLibLinux
       condition: eq( variables['Agent.OS'], 'Linux' )
-      displayName: 'publish Linux'
+      displayName: 'Linux: Publish'
 
+  # This job downloads the analyzer library compiled from the three different platforms, and preps it for publishing.
   - job: deploy
     dependsOn:
       - build
@@ -92,13 +94,14 @@ jobs:
         cp $(Pipeline.Workspace)/AnalyzerLibWin/* $(Build.ArtifactStagingDirectory)/win
         cp $(Pipeline.Workspace)/AnalyzerLibMac/* $(Build.ArtifactStagingDirectory)/osx
         cp $(Pipeline.Workspace)/AnalyzerLibLinux/* $(Build.ArtifactStagingDirectory)/linux
-        find $(Build.ArtifactStagingDirectory)
         cd $(Build.ArtifactStagingDirectory)
         zip -r ${REPO_NAME}-bin.zip .
         unzip -l ${REPO_NAME}-bin.zip
+    # This creates (or replaces) a github release for tagged commits only. The release name will be the tag name.
     - task: GithubRelease@0 
       displayName: 'Create GitHub Release'      
       inputs:
-        gitHubConnection: github.com_Marcus10110
+        gitHubConnection: $(GITHUB_CONNECTION)
         repositoryName: $(Build.Repository.Name)           
         assets: $(Build.ArtifactStagingDirectory)/*.zip
+      condition: eq( variables['ENABLE_GITHUB_RELEASES'], 'true' )
