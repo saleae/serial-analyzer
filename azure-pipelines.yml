@@ -7,7 +7,9 @@ trigger:
   branches:
     include:
       - 'master'
-      - 'azure-pipelines'
+  tags:
+    include:
+      - '*'
 pr:
   - '*'
 
@@ -82,9 +84,17 @@ jobs:
     - download: current
       artifact: AnalyzerLibMac
     - script: |
-        pwd
-        find .
-        echo $(Build.ArtifactStagingDirectory)
+        pushd $(Build.ArtifactStagingDirectory)
+        mkdir win osx linux
+        popd
+        cp $(Pipeline.Workspace)/AnalyzerLibWin/* $(Build.ArtifactStagingDirectory)/win
+        cp $(Pipeline.Workspace)/AnalyzerLibMac/* $(Build.ArtifactStagingDirectory)/osx
+        cp $(Pipeline.Workspace)/AnalyzerLibLinux/* $(Build.ArtifactStagingDirectory)/linux
         find $(Build.ArtifactStagingDirectory)
-        echo $(Pipeline.Workspace)
-        find $(Pipeline.Workspace)
+        zip -r $(Build.ArtifactStagingDirectory)/analyzer.zip $(Build.ArtifactStagingDirectory)/
+    - task: GithubRelease@0 
+      displayName: 'Create GitHub Release'      
+      inputs:
+        gitHubConnection: github.com_Marcus10110
+        repositoryName: $(Build.Repository.Name)           
+        assets: $(Build.ArtifactStagingDirectory)/analyzer.zip
