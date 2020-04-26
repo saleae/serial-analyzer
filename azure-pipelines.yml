@@ -84,6 +84,8 @@ jobs:
     - download: current
       artifact: AnalyzerLibMac
     - script: |
+        export REPO_NAME=$(echo $(Build.Repository.Name) | sed 's|.*/||')
+        echo $REPO_NAME
         pushd $(Build.ArtifactStagingDirectory)
         mkdir win osx linux
         popd
@@ -91,10 +93,12 @@ jobs:
         cp $(Pipeline.Workspace)/AnalyzerLibMac/* $(Build.ArtifactStagingDirectory)/osx
         cp $(Pipeline.Workspace)/AnalyzerLibLinux/* $(Build.ArtifactStagingDirectory)/linux
         find $(Build.ArtifactStagingDirectory)
-        zip -r $(Build.ArtifactStagingDirectory)/analyzer.zip $(Build.ArtifactStagingDirectory)/
+        cd $(Build.ArtifactStagingDirectory)
+        zip -r ${REPO_NAME}-bin.zip .
+        unzip -l ${REPO_NAME}-bin.zip
     - task: GithubRelease@0 
       displayName: 'Create GitHub Release'      
       inputs:
         gitHubConnection: github.com_Marcus10110
         repositoryName: $(Build.Repository.Name)           
-        assets: $(Build.ArtifactStagingDirectory)/analyzer.zip
+        assets: $(Build.ArtifactStagingDirectory)/*.zip
