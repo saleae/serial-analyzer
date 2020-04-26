@@ -5,10 +5,10 @@
 
 # In order to publish releases to github, you must add a new GitHub service connection in your project settings, under Pipelines -> Service Connections.
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#sep-github
-# if you don't setup a github connection, but intend to use azure CI, then you will need to disable github releases here, otherwise the build will fail.
+# if you don't setup a github connection, but intend to use azure CI, then you will need to delete the GithubRelease@0 task at the bottom of this file.
+# store the name of your service connection in GITHUB_CONNECTION.
 variables:
-  GITHUB_CONNECTION: 'github.com_Marcus10110B'
-  ENABLE_GITHUB_RELEASES: 'false'
+  GITHUB_CONNECTION: 'github.com_Marcus10110'
 
 # trigger: always build commits to master, all commits to open pull requests, and all tags.
 trigger:
@@ -98,10 +98,10 @@ jobs:
         zip -r ${REPO_NAME}-bin.zip .
         unzip -l ${REPO_NAME}-bin.zip
     # This creates (or replaces) a github release for tagged commits only. The release name will be the tag name.
+    # Note, if you do not want to setup a github service connection, but want to use CI, you will need to delete this task.
     - task: GithubRelease@0 
       displayName: 'Create GitHub Release'      
       inputs:
         gitHubConnection: $(GITHUB_CONNECTION)
         repositoryName: $(Build.Repository.Name)           
         assets: $(Build.ArtifactStagingDirectory)/*.zip
-      condition: eq( variables['ENABLE_GITHUB_RELEASES'], 'true' )
