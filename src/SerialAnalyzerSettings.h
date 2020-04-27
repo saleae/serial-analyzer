@@ -29,6 +29,7 @@ public:
 	AnalyzerEnums::Parity mParity;
 	bool mInverted;
 	bool mUseAutobaud;
+	bool mIrDA;
 	SerialAnalyzerEnums::Mode mSerialMode;
 
 protected:
@@ -39,6 +40,7 @@ protected:
 	std::auto_ptr< AnalyzerSettingInterfaceNumberList >	mStopBitsInterface;
 	std::auto_ptr< AnalyzerSettingInterfaceNumberList >	mParityInterface;
 	std::auto_ptr< AnalyzerSettingInterfaceNumberList >	mInvertedInterface;
+	std::auto_ptr< AnalyzerSettingInterfaceBool >	mIrDAInterface;
 	std::auto_ptr< AnalyzerSettingInterfaceBool >	mUseAutobaudInterface;
 	std::auto_ptr< AnalyzerSettingInterfaceNumberList >	mSerialModeInterface;
 };

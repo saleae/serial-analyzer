@@ -28,7 +28,9 @@ void SerialAnalyzer::ComputeSampleOffsets()
 	if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
 	num_bits++;
 
-	mSampleOffsets.push_back( clock_generator.AdvanceByHalfPeriod( 1.5 ) );  //point to the center of the 1st bit (past the start bit)
+	float sample_offset = mSettings->mIrDA ? 1.1 : 1.5;
+
+	mSampleOffsets.push_back( clock_generator.AdvanceByHalfPeriod( sample_offset ) );  //point to the center of the 1st bit (past the start bit)
 	num_bits--;  //we just added the first bit.
 
 	for( U32 i=0; i<num_bits; i++ )

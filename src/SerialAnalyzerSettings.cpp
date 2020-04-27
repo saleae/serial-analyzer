@@ -15,6 +15,7 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 	mShiftOrder( AnalyzerEnums::LsbFirst ),
 	mInverted( false ),
 	mUseAutobaud( false ),
+	mIrDA( false ),
 	mSerialMode( SerialAnalyzerEnums::Normal )
 {
 	mInputChannelInterface.reset( new AnalyzerSettingInterfaceChannel() );
@@ -31,6 +32,11 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 	mUseAutobaudInterface->SetTitleAndTooltip( "", "With Autobaud turned on, the analyzer will run as usual, with the current bit rate.  At the same time, it will also keep track of the shortest pulse it detects. \nAfter analyzing all the data, if the bit rate implied by this shortest pulse is different by more than 10% from the specified bit rate, the bit rate will be changed and the analysis run again." );
 	mUseAutobaudInterface->SetCheckBoxText( "Use Autobaud" );
 	mUseAutobaudInterface->SetValue( mUseAutobaud );
+
+	mIrDAInterface.reset( new AnalyzerSettingInterfaceBool() );
+	mIrDAInterface->SetTitleAndTooltip( "", "With IrDA mode turned on, the analyzer will sample the bits at 10% of the bit instead of the middle" );
+	mIrDAInterface->SetCheckBoxText( "Use IrDA mode" );
+	mIrDAInterface->SetValue( mIrDA );	
 
 	mBitsPerTransferInterface.reset( new AnalyzerSettingInterfaceNumberList() );
 	mBitsPerTransferInterface->SetTitleAndTooltip( "Bits per Frame", "Select the number of bits per frame" ); 
@@ -90,11 +96,13 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 
 	AddInterface( mInputChannelInterface.get() );
 	AddInterface( mBitRateInterface.get() );
+	AddInterface( mUseAutobaudInterface.get() );	
 	AddInterface( mBitsPerTransferInterface.get() );
 	AddInterface( mStopBitsInterface.get() );
 	AddInterface( mParityInterface.get() );
 	AddInterface( mShiftOrderInterface.get() );
 	AddInterface( mInvertedInterface.get() );
+	AddInterface( mIrDAInterface.get() );	
 	AddInterface( mSerialModeInterface.get() );
 
 	//AddExportOption( 0, "Export as text/csv file", "text (*.txt);;csv (*.csv)" );
@@ -127,7 +135,9 @@ bool SerialAnalyzerSettings::SetSettingsFromInterfaces()
 	mShiftOrder =  AnalyzerEnums::ShiftOrder( U32( mShiftOrderInterface->GetNumber() ) );
 	mInverted = bool( U32( mInvertedInterface->GetNumber() ) );
 	mUseAutobaud = mUseAutobaudInterface->GetValue();
+	mIrDA = mIrDAInterface->GetValue();
 	mSerialMode = SerialAnalyzerEnums::Mode( U32( mSerialModeInterface->GetNumber() ) );
+
 
 	ClearChannels();
 	AddChannel( mInputChannel, "Serial", true );
@@ -146,6 +156,7 @@ void SerialAnalyzerSettings::UpdateInterfacesFromSettings()
 	mInvertedInterface->SetNumber( mInverted );
 	mUseAutobaudInterface->SetValue( mUseAutobaud );
 	mSerialModeInterface->SetNumber( mSerialMode );
+	mIrDAInterface->SetValue( mIrDA );
 }
 
 void SerialAnalyzerSettings::LoadSettings( const char* settings )
@@ -171,6 +182,10 @@ void SerialAnalyzerSettings::LoadSettings( const char* settings )
 	if( text_archive >> use_autobaud )
 		mUseAutobaud = use_autobaud;
 
+	bool irda;
+	if( text_archive >> irda )
+		mIrDA = irda;
+
 	SerialAnalyzerEnums::Mode mode;
 	if( text_archive >> *(U32*)&mode )
 		mSerialMode = mode;
@@ -195,6 +210,7 @@ const char* SerialAnalyzerSettings::SaveSettings()
 	text_archive << mInverted;
 
 	text_archive << mUseAutobaud;
+	text_archive << mIrDA;
 
 	text_archive << mSerialMode;
 
