@@ -61,10 +61,12 @@ void SerialAnalyzer::WorkerThread()
 {
     mSampleRateHz = GetSampleRate();
     ComputeSampleOffsets();
-    U32 num_bits = mSettings->mBitsPerTransfer;
 
+    U32 bits_per_transfer = mSettings->mBitsPerTransfer;
     if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
-        num_bits++;
+        bits_per_transfer++;
+
+    const U32 bytes_per_transfer = ( bits_per_transfer + 7 ) / 8;
 
     if( mSettings->mInverted == false )
     {
@@ -79,7 +81,7 @@ void SerialAnalyzer::WorkerThread()
 
     U64 bit_mask = 0;
     U64 mask = 0x1ULL;
-    for( U32 i = 0; i < num_bits; i++ )
+    for( U32 i = 0; i < bits_per_transfer; i++ )
     {
         bit_mask |= mask;
         mask <<= 1;
@@ -106,10 +108,10 @@ void SerialAnalyzer::WorkerThread()
         bool mp_is_address = false;
 
         DataBuilder data_builder;
-        data_builder.Reset( &data, mSettings->mShiftOrder, num_bits );
+        data_builder.Reset( &data, mSettings->mShiftOrder, bits_per_transfer );
         U64 marker_location = frame_starting_sample;
 
-        for( U32 i = 0; i < num_bits; i++ )
+        for( U32 i = 0; i < bits_per_transfer; i++ )
         {
             mSerial->Advance( mSampleOffsets[ i ] );
             data_builder.AddBit( mSerial->GetBitState() );
@@ -124,21 +126,15 @@ void SerialAnalyzer::WorkerThread()
         if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
         {
             // extract the MSB
-            U64 msb = data >> ( num_bits - 1 );
+            U64 msb = data >> ( bits_per_transfer - 1 );
             msb &= 0x1;
             if( mSettings->mSerialMode == SerialAnalyzerEnums::MpModeMsbOneMeansAddress )
             {
-                if( msb == 0x0 )
-                    mp_is_address = false;
-                else
-                    mp_is_address = true;
+                mp_is_address = msb == 0x1;
             }
-            if( mSettings->mSerialMode == SerialAnalyzerEnums::MpModeMsbZeroMeansAddress )
+            else if( mSettings->mSerialMode == SerialAnalyzerEnums::MpModeMsbZeroMeansAddress )
             {
-                if( msb == 0x0 )
-                    mp_is_address = true;
-                else
-                    mp_is_address = false;
+                mp_is_address = msb == 0x0;
             }
             // now remove the msb.
             data &= ( bit_mask >> 1 );
@@ -232,14 +228,29 @@ void SerialAnalyzer::WorkerThread()
         mResults->AddFrame( frame );
 
         FrameV2 framev2;
-        if (mSettings->mBitsPerTransfer <= 8) {
-            framev2.AddByte( "value", data );
-        } else {
-            framev2.AddInteger( "value", data );
+
+        U8 bytes[ 8 ];
+        for( int i = 0; i < bytes_per_transfer; ++i )
+        {
+            auto bit_offset = ( bytes_per_transfer - i - 1 ) * 8;
+            bytes[ i ] = data >> bit_offset;
         }
-        framev2.AddBoolean( "parity_error", parity_error );
-        framev2.AddBoolean( "framing_error", framing_error );
-        framev2.AddBoolean( "address", mp_is_address );
+        framev2.AddByteArray( "data", bytes, bytes_per_transfer );
+
+        if( parity_error )
+        {
+            framev2.AddString( "error", "parity" );
+        }
+        else if( framing_error )
+        {
+            framev2.AddString( "error", "framing" );
+        }
+
+        if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
+        {
+            framev2.AddBoolean( "address", mp_is_address );
+        }
+
         mResults->AddFrameV2( framev2, "data", frame_starting_sample, mSerial->GetSampleNumber() );
 
         mResults->CommitResults();
