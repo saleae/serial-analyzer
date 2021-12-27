@@ -6,6 +6,7 @@
 SerialAnalyzer::SerialAnalyzer() : Analyzer2(), mSettings( new SerialAnalyzerSettings() ), mSimulationInitilized( false )
 {
     SetAnalyzerSettings( mSettings.get() );
+    UseFrameV2();
 }
 
 SerialAnalyzer::~SerialAnalyzer()
