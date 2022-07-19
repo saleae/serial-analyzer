@@ -67,7 +67,8 @@ void SerialAnalyzer::WorkerThread()
     if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
         bits_per_transfer++;
 
-    const U32 bytes_per_transfer = ( bits_per_transfer + 7 ) / 8;
+    // used for HLA byte count, this should not include an extra bit for MP/MDB
+    const U32 bytes_per_transfer = ( mSettings->mBitsPerTransfer + 7 ) / 8;
 
     if( mSettings->mInverted == false )
     {
