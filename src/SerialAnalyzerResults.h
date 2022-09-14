@@ -12,22 +12,21 @@ class SerialAnalyzerSettings;
 
 class SerialAnalyzerResults : public AnalyzerResults
 {
-public:
-	SerialAnalyzerResults( SerialAnalyzer* analyzer, SerialAnalyzerSettings* settings );
-	virtual ~SerialAnalyzerResults();
+  public:
+    SerialAnalyzerResults( SerialAnalyzer* analyzer, SerialAnalyzerSettings* settings );
+    virtual ~SerialAnalyzerResults();
 
-	virtual void GenerateBubbleText( U64 frame_index, Channel& channel, DisplayBase display_base );
-	virtual void GenerateExportFile( const char* file, DisplayBase display_base, U32 export_type_user_id );
+    virtual void GenerateBubbleText( U64 frame_index, Channel& channel, DisplayBase display_base );
+    virtual void GenerateExportFile( const char* file, DisplayBase display_base, U32 export_type_user_id );
 
-	virtual void GenerateFrameTabularText(U64 frame_index, DisplayBase display_base );
-	virtual void GeneratePacketTabularText( U64 packet_id, DisplayBase display_base );
-	virtual void GenerateTransactionTabularText( U64 transaction_id, DisplayBase display_base );
+    virtual void GenerateFrameTabularText( U64 frame_index, DisplayBase display_base );
+    virtual void GeneratePacketTabularText( U64 packet_id, DisplayBase display_base );
+    virtual void GenerateTransactionTabularText( U64 transaction_id, DisplayBase display_base );
 
-protected: //functions
-
-protected:  //vars
-	SerialAnalyzerSettings* mSettings;
-	SerialAnalyzer* mAnalyzer;
+  protected: // functions
+  protected: // vars
+    SerialAnalyzerSettings* mSettings;
+    SerialAnalyzer* mAnalyzer;
 };
 
-#endif //SERIAL_ANALYZER_RESULTS
+#endif // SERIAL_ANALYZER_RESULTS
