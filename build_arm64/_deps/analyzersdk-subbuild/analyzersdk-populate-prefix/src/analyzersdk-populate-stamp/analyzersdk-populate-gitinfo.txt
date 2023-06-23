@@ -1,3 +1,0 @@
-repository='https://github.com/saleae/AnalyzerSDK.git'
-module=''
-tag='origin'
