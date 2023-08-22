@@ -25,7 +25,7 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
     mBitRateInterface->SetTitleAndTooltip( "Bit Rate (Bits/s)", "Specify the bit rate in bits per second." );
     mBitRateInterface->SetMax( 100000000 );
     mBitRateInterface->SetMin( 1 );
-    mBitRateInterface->SetInteger( mBitRate );
+    mBitRateInterface->SetInteger( (int)mBitRate );
 
     mUseAutobaudInterface.reset( new AnalyzerSettingInterfaceBool() );
     mUseAutobaudInterface->SetTitleAndTooltip(
@@ -151,7 +151,7 @@ bool SerialAnalyzerSettings::SetSettingsFromInterfaces()
 void SerialAnalyzerSettings::UpdateInterfacesFromSettings()
 {
     mInputChannelInterface->SetChannel( mInputChannel );
-    mBitRateInterface->SetInteger( mBitRate );
+    mBitRateInterface->SetInteger( (int)mBitRate );
     mBitsPerTransferInterface->SetNumber( mBitsPerTransfer );
     mStopBitsInterface->SetNumber( mStopBits );
     mParityInterface->SetNumber( mParity );
