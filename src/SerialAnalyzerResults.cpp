@@ -41,10 +41,8 @@ void SerialAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*chan
     char result_str[ 128 ];
 
     // MP mode address case:
-    bool mp_mode_address_flag = false;
     if( ( frame.mFlags & MP_MODE_ADDRESS_FLAG ) != 0 )
     {
-        mp_mode_address_flag = true;
 
         AddResultString( "A" );
         AddResultString( "Addr" );
@@ -221,10 +219,8 @@ void SerialAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBa
     char result_str[ 128 ];
 
     // MP mode address case:
-    bool mp_mode_address_flag = false;
     if( ( frame.mFlags & MP_MODE_ADDRESS_FLAG ) != 0 )
     {
-        mp_mode_address_flag = true;
 
         if( framing_error == false )
         {
