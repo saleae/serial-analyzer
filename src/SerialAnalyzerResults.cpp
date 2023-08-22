@@ -16,7 +16,7 @@ SerialAnalyzerResults::~SerialAnalyzerResults()
 }
 
 void SerialAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*channel*/,
-                                                DisplayBase display_base ) // unrefereced vars commented out to remove warnings.
+                                                DisplayBase display_base ) // unreferenced vars commented out to remove warnings.
 {
     // we only need to pay attention to 'channel' if we're making bubbles for more than one channel (as set by
     // AddChannelBubblesWillAppearOn)
@@ -258,14 +258,14 @@ void SerialAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBa
 }
 
 void SerialAnalyzerResults::GeneratePacketTabularText( U64 /*packet_id*/,
-                                                       DisplayBase /*display_base*/ ) // unrefereced vars commented out to remove warnings.
+                                                       DisplayBase /*display_base*/ ) // unreferenced vars commented out to remove warnings.
 {
     ClearResultStrings();
     AddResultString( "not supported" );
 }
 
 void SerialAnalyzerResults::GenerateTransactionTabularText(
-    U64 /*transaction_id*/, DisplayBase /*display_base*/ ) // unrefereced vars commented out to remove warnings.
+    U64 /*transaction_id*/, DisplayBase /*display_base*/ ) // unreferenced vars commented out to remove warnings.
 {
     ClearResultStrings();
     AddResultString( "not supported" );

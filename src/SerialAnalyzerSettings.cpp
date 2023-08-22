@@ -179,7 +179,7 @@ void SerialAnalyzerSettings::LoadSettings( const char* settings )
     text_archive >> *( U32* )&mShiftOrder;
     text_archive >> mInverted;
 
-    // check to make sure loading it actual works befor assigning the result -- do this when adding settings to an anylzer which has been
+    // check to make sure loading it actual works before assigning the result -- do this when adding settings to an analyzer which has been
     // previously released.
     bool use_autobaud;
     if( text_archive >> use_autobaud )

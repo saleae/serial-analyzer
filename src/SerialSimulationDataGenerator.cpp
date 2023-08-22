@@ -141,6 +141,6 @@ void SerialSimulationDataGenerator::CreateSerialByte( U64 value )
 
     mSerialSimulationData.TransitionIfNeeded( mBitHigh ); // we need to end high
 
-    // lets pad the end a bit for the stop bit:
+    // let's pad the end a bit for the stop bit:
     mSerialSimulationData.Advance( mClockGenerator.AdvanceByHalfPeriod( mSettings->mStopBits ) );
 }

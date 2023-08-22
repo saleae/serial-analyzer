@@ -3,7 +3,7 @@
 #include <AnalyzerChannelData.h>
 
 
-SerialAnalyzer::SerialAnalyzer() : Analyzer2(), mSettings( new SerialAnalyzerSettings() ), mSimulationInitilized( false )
+SerialAnalyzer::SerialAnalyzer() : Analyzer2(), mSettings( new SerialAnalyzerSettings() ), mSimulationInitialized( false )
 {
     SetAnalyzerSettings( mSettings.get() );
     UseFrameV2();
@@ -43,7 +43,7 @@ void SerialAnalyzer::ComputeSampleOffsets()
         1.0 ); // i.e. moving from the center of the last data bit (where we left off) to 1/2 period into the stop bit
 
     // and 1/2 bit before end of the stop bit period
-    mEndOfStopBitOffset = clock_generator.AdvanceByHalfPeriod( mSettings->mStopBits - 1.0 ); // if stopbits == 1.0, this will be 0
+    mEndOfStopBitOffset = clock_generator.AdvanceByHalfPeriod( mSettings->mStopBits - 1.0 ); // if stopBits == 1.0, this will be 0
 }
 
 
@@ -97,7 +97,7 @@ void SerialAnalyzer::WorkerThread()
 
     for( ;; )
     {
-        // we're starting high.  (we'll assume that we're not in the middle of a byte.
+        // we're starting high. (we'll assume that we're not in the middle of a byte.)
 
         mSerial->AdvanceToNextEdge();
 
@@ -180,7 +180,7 @@ void SerialAnalyzer::WorkerThread()
             mResults->AddMarker( marker_location, AnalyzerResults::Square, mSettings->mInputChannel );
         }
 
-        // now we must dermine if there is a framing error.
+        // now we must determine if there is a framing error.
         framing_error = false;
 
         mSerial->Advance( mStartOfStopBitOffset );
@@ -211,8 +211,8 @@ void SerialAnalyzer::WorkerThread()
         // ok now record the value!
         // note that we're not using the mData2 or mType fields for anything, so we won't bother to set them.
         Frame frame;
-        frame.mStartingSampleInclusive = frame_starting_sample;
-        frame.mEndingSampleInclusive = mSerial->GetSampleNumber();
+        frame.mStartingSampleInclusive = (S64)frame_starting_sample;
+        frame.mEndingSampleInclusive = (S64)mSerial->GetSampleNumber();
         frame.mData1 = data;
         frame.mFlags = 0;
         if( parity_error == true )
@@ -229,7 +229,7 @@ void SerialAnalyzer::WorkerThread()
 
         mResults->AddFrame( frame );
 
-        FrameV2 framev2;
+        FrameV2 frameV2;
 
         U8 bytes[ 8 ];
         for( int i = 0; i < bytes_per_transfer; ++i )
@@ -237,23 +237,23 @@ void SerialAnalyzer::WorkerThread()
             auto bit_offset = ( bytes_per_transfer - i - 1 ) * 8;
             bytes[ i ] = data >> bit_offset;
         }
-        framev2.AddByteArray( "data", bytes, bytes_per_transfer );
+        frameV2.AddByteArray( "data", bytes, bytes_per_transfer );
 
         if( parity_error )
         {
-            framev2.AddString( "error", "parity" );
+            frameV2.AddString( "error", "parity" );
         }
         else if( framing_error )
         {
-            framev2.AddString( "error", "framing" );
+            frameV2.AddString( "error", "framing" );
         }
 
         if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
         {
-            framev2.AddBoolean( "address", mp_is_address );
+            frameV2.AddBoolean( "address", mp_is_address );
         }
 
-        mResults->AddFrameV2( framev2, "data", frame_starting_sample, mSerial->GetSampleNumber() );
+        mResults->AddFrameV2( frameV2, "data", frame_starting_sample, mSerial->GetSampleNumber() );
 
         mResults->CommitResults();
 
@@ -283,7 +283,7 @@ bool SerialAnalyzer::NeedsRerun()
     U32 computed_bit_rate = U32( double( mSampleRateHz ) / double( shortest_pulse ) );
 
     if( computed_bit_rate > mSampleRateHz )
-        AnalyzerHelpers::Assert( "Alg problem, computed_bit_rate is higer than sample rate" ); // just checking the obvious...
+        AnalyzerHelpers::Assert( "Alg problem, computed_bit_rate is higher than sample rate" ); // just checking the obvious...
 
     if( computed_bit_rate > ( mSampleRateHz / 4 ) )
         return false; // the baud rate is too fast.
@@ -312,10 +312,10 @@ bool SerialAnalyzer::NeedsRerun()
 U32 SerialAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate,
                                             SimulationChannelDescriptor** simulation_channels )
 {
-    if( mSimulationInitilized == false )
+    if( mSimulationInitialized == false )
     {
         mSimulationDataGenerator.Initialize( GetSimulationSampleRate(), mSettings.get() );
-        mSimulationInitilized = true;
+        mSimulationInitialized = true;
     }
 
     return mSimulationDataGenerator.GenerateSimulationData( minimum_sample_index, device_sample_rate, simulation_channels );

@@ -34,7 +34,7 @@ class SerialAnalyzer : public Analyzer2
     AnalyzerChannelData* mSerial;
 
     SerialSimulationDataGenerator mSimulationDataGenerator;
-    bool mSimulationInitilized;
+    bool mSimulationInitialized;
 
     // Serial analysis vars:
     U32 mSampleRateHz;
