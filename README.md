@@ -4,7 +4,7 @@ Saleae Asynchronous Serial Analyzer
 
 ## Getting Started
 
-The following documentation describes getting this analyzer building locally. For more detailed information about the Analyzer SDK, debugging, CI build, and more, checkout the readme from the Sample Analyzer repository:
+The following documentation describes how to build this analyzer locally. For more detailed information about the Analyzer SDK, debugging, CI builds, and more, check out the readme in the Sample Analyzer repository.
 
 https://github.com/saleae/SampleAnalyzer
 
@@ -42,7 +42,7 @@ Building the analyzer:
 mkdir build
 cd build
 cmake ..
-cmake --build .
+cmake --build . # --config Release to build in release mode
 ```
 
 ### Ubuntu 18.04+
@@ -65,7 +65,7 @@ Building the analyzer:
 mkdir build
 cd build
 cmake ..
-cmake --build .
+cmake --build . # --config Release to build in release mode
 ```
 
 ### Windows
@@ -102,6 +102,7 @@ Building the analyzer:
 mkdir build
 cd build
 cmake .. -A x64
+cmake --build . # --config Release to build in release mode
 ```
 
 Then, open the newly created solution file located here: `build\serial_analyzer.sln`
@@ -119,11 +120,11 @@ For debug and release builds, respectively.
   
 ### Frame Type: `"data"`
 
-| Property | Type | Description |
-| :--- | :--- | :--- |
-| `data` | bytes | The serial word, the width in bits is controlled by the serial settings |
-| `error` | str | (optional) Present if an error was detected when decoding this word |
-| `address` | bool | (optional) Present if multi-processor or multi-drop bus special modes were selected. True indicates that this is an address byte |
+| Property  | Type  | Description                                                                                                                      |
+|:----------|:------|:---------------------------------------------------------------------------------------------------------------------------------|
+| `data`    | bytes | The serial word, the width in bits is controlled by the serial settings                                                          |
+| `error`   | str   | (optional) Present if an error was detected when decoding this word                                                              |
+| `address` | bool  | (optional) Present if multi-processor or multi-drop bus special modes were selected. True indicates that this is an address byte |
 
 A single serial word
 
