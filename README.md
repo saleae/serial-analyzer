@@ -1,7 +1,5 @@
 # Saleae Asynchronous Serial Analyzer
 
-Saleae Asynchronous Serial Analyzer
-
 ## Getting Started
 
 The following documentation describes how to build this analyzer locally. For more detailed information about the Analyzer SDK, debugging, CI builds, and more, check out the readme in the Sample Analyzer repository.
