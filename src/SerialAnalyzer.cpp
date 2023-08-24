@@ -232,10 +232,10 @@ void SerialAnalyzer::WorkerThread()
         FrameV2 frameV2;
 
         U8 bytes[ 8 ];
-        for( int i = 0; i < bytes_per_transfer; ++i )
+        for( U32 i = 0; i < bytes_per_transfer; ++i )
         {
             auto bit_offset = ( bytes_per_transfer - i - 1 ) * 8;
-            bytes[ i ] = data >> bit_offset;
+            bytes[ i ] = (U8)(data >> bit_offset);
         }
         frameV2.AddByteArray( "data", bytes, bytes_per_transfer );
 
