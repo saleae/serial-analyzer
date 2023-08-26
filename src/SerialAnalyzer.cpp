@@ -211,8 +211,8 @@ void SerialAnalyzer::WorkerThread()
         // ok now record the value!
         // note that we're not using the mData2 or mType fields for anything, so we won't bother to set them.
         Frame frame;
-        frame.mStartingSampleInclusive = (S64)frame_starting_sample;
-        frame.mEndingSampleInclusive = (S64)mSerial->GetSampleNumber();
+        frame.mStartingSampleInclusive = ( S64 )frame_starting_sample;
+        frame.mEndingSampleInclusive = ( S64 )mSerial->GetSampleNumber();
         frame.mData1 = data;
         frame.mFlags = 0;
         if( parity_error == true )
@@ -235,7 +235,7 @@ void SerialAnalyzer::WorkerThread()
         for( U32 i = 0; i < bytes_per_transfer; ++i )
         {
             auto bit_offset = ( bytes_per_transfer - i - 1 ) * 8;
-            bytes[ i ] = (U8)(data >> bit_offset);
+            bytes[ i ] = ( U8 )( data >> bit_offset );
         }
         frameV2.AddByteArray( "data", bytes, bytes_per_transfer );
 

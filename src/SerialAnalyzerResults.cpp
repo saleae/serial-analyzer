@@ -11,8 +11,7 @@ SerialAnalyzerResults::SerialAnalyzerResults( SerialAnalyzer* analyzer, SerialAn
 {
 }
 
-SerialAnalyzerResults::~SerialAnalyzerResults()
-= default;
+SerialAnalyzerResults::~SerialAnalyzerResults() = default;
 
 void SerialAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*channel*/,
                                                 DisplayBase display_base ) // unreferenced vars commented out to remove warnings.
@@ -42,7 +41,6 @@ void SerialAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*chan
     // MP mode address case:
     if( ( frame.mFlags & MP_MODE_ADDRESS_FLAG ) != 0 )
     {
-
         AddResultString( "A" );
         AddResultString( "Addr" );
 
@@ -129,7 +127,7 @@ void SerialAnalyzerResults::GenerateExportFile( const char* file, DisplayBase di
 
             ss << std::endl;
 
-            AnalyzerHelpers::AppendToFile( ( U8* )ss.str().c_str(), (U32)ss.str().length(), f );
+            AnalyzerHelpers::AppendToFile( ( U8* )ss.str().c_str(), ( U32 )ss.str().length(), f );
             ss.str( std::string() );
 
             if( UpdateExportProgressAndCheckForCancel( i, num_frames ) == true )
@@ -179,7 +177,7 @@ void SerialAnalyzerResults::GenerateExportFile( const char* file, DisplayBase di
 
             ss << std::endl;
 
-            AnalyzerHelpers::AppendToFile( ( U8* )ss.str().c_str(), (U32)ss.str().length(), f );
+            AnalyzerHelpers::AppendToFile( ( U8* )ss.str().c_str(), ( U32 )ss.str().length(), f );
             ss.str( std::string() );
 
 
@@ -220,7 +218,6 @@ void SerialAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBa
     // MP mode address case:
     if( ( frame.mFlags & MP_MODE_ADDRESS_FLAG ) != 0 )
     {
-
         if( framing_error == false )
         {
             snprintf( result_str, sizeof( result_str ), "Address: %s", number_str );

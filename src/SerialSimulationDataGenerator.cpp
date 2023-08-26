@@ -1,11 +1,9 @@
 #include "SerialSimulationDataGenerator.h"
 #include "SerialAnalyzerSettings.h"
 
-SerialSimulationDataGenerator::SerialSimulationDataGenerator()
-= default;
+SerialSimulationDataGenerator::SerialSimulationDataGenerator() = default;
 
-SerialSimulationDataGenerator::~SerialSimulationDataGenerator()
-= default;
+SerialSimulationDataGenerator::~SerialSimulationDataGenerator() = default;
 
 void SerialSimulationDataGenerator::Initialize( U32 simulation_sample_rate, SerialAnalyzerSettings* settings )
 {
