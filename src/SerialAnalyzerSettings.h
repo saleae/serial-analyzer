@@ -12,7 +12,7 @@ namespace SerialAnalyzerEnums
         MpModeMsbZeroMeansAddress,
         MpModeMsbOneMeansAddress
     };
-};
+}
 
 class SerialAnalyzerSettings : public AnalyzerSettings
 {
