@@ -120,8 +120,7 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 }
 
 SerialAnalyzerSettings::~SerialAnalyzerSettings()
-{
-}
+= default;
 
 bool SerialAnalyzerSettings::SetSettingsFromInterfaces()
 {

@@ -4,7 +4,7 @@
 #include "SerialAnalyzerSettings.h"
 #include <iostream>
 #include <sstream>
-#include <stdio.h>
+
 
 SerialAnalyzerResults::SerialAnalyzerResults( SerialAnalyzer* analyzer, SerialAnalyzerSettings* settings )
     : AnalyzerResults(), mSettings( settings ), mAnalyzer( analyzer )
@@ -12,8 +12,7 @@ SerialAnalyzerResults::SerialAnalyzerResults( SerialAnalyzer* analyzer, SerialAn
 }
 
 SerialAnalyzerResults::~SerialAnalyzerResults()
-{
-}
+= default;
 
 void SerialAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*channel*/,
                                                 DisplayBase display_base ) // unreferenced vars commented out to remove warnings.
@@ -74,9 +73,9 @@ void SerialAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*chan
         snprintf( result_str, sizeof( result_str ), "%s (error)", number_str );
         AddResultString( result_str );
 
-        if( parity_error == true && framing_error == false )
+        if( framing_error == false )
             snprintf( result_str, sizeof( result_str ), "%s (parity error)", number_str );
-        else if( parity_error == false && framing_error == true )
+        else if( parity_error == false )
             snprintf( result_str, sizeof( result_str ), "%s (framing error)", number_str );
         else
             snprintf( result_str, sizeof( result_str ), "%s (framing error & parity error)", number_str );
@@ -238,9 +237,9 @@ void SerialAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBa
     // normal case:
     if( ( parity_error == true ) || ( framing_error == true ) )
     {
-        if( parity_error == true && framing_error == false )
+        if( framing_error == false )
             snprintf( result_str, sizeof( result_str ), "%s (parity error)", number_str );
-        else if( parity_error == false && framing_error == true )
+        else if( parity_error == false )
             snprintf( result_str, sizeof( result_str ), "%s (framing error)", number_str );
         else
             snprintf( result_str, sizeof( result_str ), "%s (framing error & parity error)", number_str );
