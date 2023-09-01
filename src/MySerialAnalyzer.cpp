@@ -95,7 +95,11 @@ void MySerialAnalyzer::WorkerThread()
     if( mSerial->GetBitState() == mBitLow )
         mSerial->AdvanceToNextEdge();
 
-    bool bitrate_changed = false ; 
+    size_t mszBrChange = mSettings->mszBRChange ;
+    size_t mBrIdx = 0 ;
+    
+    U32 *mBitRates = mSettings->mBRChangeBitRate ;
+    float *mTimes = mSettings->mBRChangeTime ;
 
     for( ;; )
     {
@@ -106,12 +110,14 @@ void MySerialAnalyzer::WorkerThread()
         // we're now at the beginning of the start bit.  We can start collecting the data.
         U64 frame_starting_sample = mSerial->GetSampleNumber();
 
-        // we change bitrate at 7.765s
-        if (frame_starting_sample >= (float) mSampleRateHz * 7.765   && !bitrate_changed) {
-            mResults->AddMarker(frame_starting_sample, AnalyzerResults::X, mSettings->mInputChannel) ;
-            bitrate_changed = true ;
-            mSettings->mBitRate = 250000 ; 
-            ComputeSampleOffsets();
+        // change birate according to settings
+        if ( (mszBrChange > 0) ) {
+            while ( (mBrIdx < (mszBrChange - 1)) && (frame_starting_sample >= (float) mSampleRateHz * mTimes[mBrIdx+1])  ) {
+                mBrIdx++ ;
+            }
+            mResults->AddMarker(frame_starting_sample, AnalyzerResults::X, mSettings->mInputChannel) ; 
+            mSettings->mBitRate = mBitRates[mBrIdx] ;
+            ComputeSampleOffsets(); 
         }
 
         U64 data = 0;

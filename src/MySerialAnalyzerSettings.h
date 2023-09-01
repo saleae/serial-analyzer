@@ -28,6 +28,13 @@ class MySerialAnalyzerSettings : public AnalyzerSettings
 
     Channel mInputChannel;
     U32 mBitRate;
+
+#define MAXBRCHANGE 10
+    std::string mBitRateChange; // string containing when to change bitrate, in the form time:bitrate, separated by spaces
+    float mBRChangeTime[MAXBRCHANGE];    // array of times when bitrate must change
+    U32 mBRChangeBitRate[MAXBRCHANGE];   // corresponding bitrate values
+    size_t mszBRChange; //number of elements in the above arrays
+    
     U32 mBitsPerTransfer;
     AnalyzerEnums::ShiftOrder mShiftOrder;
     double mStopBits;
@@ -37,8 +44,10 @@ class MySerialAnalyzerSettings : public AnalyzerSettings
     MySerialAnalyzerEnums::Mode mSerialMode;
 
   protected:
+    void SyncBitRateChange();
     std::auto_ptr<AnalyzerSettingInterfaceChannel> mInputChannelInterface;
     std::auto_ptr<AnalyzerSettingInterfaceInteger> mBitRateInterface;
+    std::auto_ptr<AnalyzerSettingInterfaceText> mBitRateChangeInterface;
     std::auto_ptr<AnalyzerSettingInterfaceNumberList> mBitsPerTransferInterface;
     std::auto_ptr<AnalyzerSettingInterfaceNumberList> mShiftOrderInterface;
     std::auto_ptr<AnalyzerSettingInterfaceNumberList> mStopBitsInterface;
