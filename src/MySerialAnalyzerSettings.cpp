@@ -3,6 +3,7 @@
 #include <AnalyzerHelpers.h>
 #include <sstream>
 #include <cstring>
+#include <vector>
 
 #pragma warning( disable : 4800 ) // warning C4800: 'U32' : forcing value to bool 'true' or 'false' (performance warning)
 
@@ -28,7 +29,7 @@ MySerialAnalyzerSettings::MySerialAnalyzerSettings()
     mBitRateInterface->SetInteger( mBitRate );
 
     mBitRateChangeInterface.reset(new AnalyzerSettingInterfaceText() );
-    mBitRateChangeInterface->SetTitleAndTooltip( "Bitrate change", "Time and bitrate change" );
+    mBitRateChangeInterface->SetTitleAndTooltip( "Bitrate changes", "Timestamp:Bitrate, separated by spaces." );
     mBitRateChangeInterface->SetTextType(AnalyzerSettingInterfaceText::NormalText);
 
     mUseAutobaudInterface.reset( new AnalyzerSettingInterfaceBool() );
@@ -129,60 +130,52 @@ MySerialAnalyzerSettings::~MySerialAnalyzerSettings()
 }
 
 /*
- * Fills mBRChange arrays according to mBitRateChange string contents
+ * Fills mBRChange map according to mBitRateChange string contents
  * eg: if mBitRatechange contains "0:9600 7.765:250000"
- * mBRChangeTime[] will contain {0,7.765}
- * mBRChangeBitRate[] will contain {9600,250000}
+ * mBRChange will contain { 0 => 9600, 7.765 => 250000}
  */
 void MySerialAnalyzerSettings::SyncBitRateChange()
 {
-    if (mBitRateChange.empty()) return ;
+    mBRChange.clear() ;
 
-    
-    std::string s=mBitRateChange;
+    if (mBitRateChangeStr.empty()) return ;
+   
+    std::string s=mBitRateChangeStr;
     std::string delimiter = " " ;
-    std::string token[MAXBRCHANGE];
-    size_t tokidx = 0 ;
+    std::vector<std::string> token;
+    
     size_t pos = 0 ;
 
     float time ;
     U32 bitrate ;
-    mszBRChange=0 ;
 
     // parse string separated by spaces, and fill array of found tokens
     while ((pos = s.find(delimiter)) != std::string::npos) {
         std::string t=s.substr(0,pos);
         // std::cout << "token:{" << t << "}" << std::endl ;
         s.erase(0,pos+delimiter.length());
+        
         if (t.empty()) { // multiple spaces
             continue ;
         }
-        token[tokidx++]=t ;
-        if (tokidx >= MAXBRCHANGE ) {
-            // std::cout << "overflow" << std::endl ;
-            break ;
-        }
+
+        token.push_back(t) ;
     }
 
-    if ((!s.empty()) && tokidx < MAXBRCHANGE) { // end ot the string after last seen separator
-        token[tokidx] = s ;
+    // remaining of the string after last seen separator
+    if (!s.empty()) {
+        token.push_back(s) ;
     }
 
-    if (tokidx >= MAXBRCHANGE) { // if we have oveflowed reset tokidx
-        tokidx = MAXBRCHANGE -1 ;
-    }
-
-    // parse every token and fill the arrays
-    while (mszBRChange <= tokidx) {
-        if (sscanf(token[mszBRChange].c_str(),"%f:%u",&time, &bitrate) != 2) { // parsing error
+    // parse every token and fill mBRChange
+    for (const std::string&t : token) {
+        if (sscanf(t.c_str(),"%f:%u",&time, &bitrate) != 2) { // parsing error
             // std::cout << "parsing error {" << token[mszBRChange] << "}" << std::endl ;
-            return;
+            //TODO: display error to user.
+            continue;
         }
-        // std::cout << "index=" << mszBRChange << std::endl ;
-        mBRChangeTime[mszBRChange]=time ;
-        mBRChangeBitRate[mszBRChange]=bitrate ;
         
-        mszBRChange++ ;
+        mBRChange[time] = bitrate ;
     }
 
     return ;
@@ -199,7 +192,7 @@ bool MySerialAnalyzerSettings::SetSettingsFromInterfaces()
 
     mInputChannel = mInputChannelInterface->GetChannel();
     mBitRate = mBitRateInterface->GetInteger();
-    mBitRateChange = mBitRateChangeInterface->GetText();
+    mBitRateChangeStr = mBitRateChangeInterface->GetText();
     SyncBitRateChange() ;
 
     mBitsPerTransfer = U32( mBitsPerTransferInterface->GetNumber() );
@@ -220,7 +213,7 @@ void MySerialAnalyzerSettings::UpdateInterfacesFromSettings()
 {
     mInputChannelInterface->SetChannel( mInputChannel );
     mBitRateInterface->SetInteger( mBitRate );
-    mBitRateChangeInterface->SetText( mBitRateChange.c_str()) ;
+    mBitRateChangeInterface->SetText( mBitRateChangeStr.c_str()) ;
     mBitsPerTransferInterface->SetNumber( mBitsPerTransfer );
     mStopBitsInterface->SetNumber( mStopBits );
     mParityInterface->SetNumber( mParity );
@@ -260,7 +253,7 @@ void MySerialAnalyzerSettings::LoadSettings( const char* settings )
 
     const char * bitratechange_string ;
     if ( text_archive >> &bitratechange_string ) {
-        mBitRateChange = name_string ;
+        mBitRateChangeStr = name_string ;
         SyncBitRateChange() ;
     }
 
@@ -286,7 +279,7 @@ const char* MySerialAnalyzerSettings::SaveSettings()
     text_archive << mUseAutobaud;
 
     text_archive << mSerialMode;
-    text_archive << mBitRateChange.c_str() ;
+    text_archive << mBitRateChangeStr.c_str() ;
 
     return SetReturnString( text_archive.GetString() );
 }

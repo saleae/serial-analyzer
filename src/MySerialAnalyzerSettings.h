@@ -3,6 +3,7 @@
 
 #include <AnalyzerSettings.h>
 #include <AnalyzerTypes.h>
+#include <map>
 
 namespace MySerialAnalyzerEnums
 {
@@ -13,6 +14,8 @@ namespace MySerialAnalyzerEnums
         MpModeMsbOneMeansAddress
     };
 };
+
+typedef std::map<float, U32> BRTime ;
 
 class MySerialAnalyzerSettings : public AnalyzerSettings
 {
@@ -29,11 +32,10 @@ class MySerialAnalyzerSettings : public AnalyzerSettings
     Channel mInputChannel;
     U32 mBitRate;
 
-#define MAXBRCHANGE 10
-    std::string mBitRateChange; // string containing when to change bitrate, in the form time:bitrate, separated by spaces
-    float mBRChangeTime[MAXBRCHANGE];    // array of times when bitrate must change
-    U32 mBRChangeBitRate[MAXBRCHANGE];   // corresponding bitrate values
-    size_t mszBRChange; //number of elements in the above arrays
+    std::string mBitRateChangeStr; // string containing when to change bitrate, in the form time:bitrate, separated by spaces
+    
+    // this will contain when to change baudrate. Keys: timestamp, value: baudrate to set.
+    BRTime mBRChange ; 
     
     U32 mBitsPerTransfer;
     AnalyzerEnums::ShiftOrder mShiftOrder;

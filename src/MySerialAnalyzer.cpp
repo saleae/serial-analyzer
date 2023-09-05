@@ -1,7 +1,8 @@
 ﻿#include "MySerialAnalyzer.h"
 #include "MySerialAnalyzerSettings.h"
 #include <AnalyzerChannelData.h>
-
+#include <map>
+#include <iterator>
 
 MySerialAnalyzer::MySerialAnalyzer() : Analyzer2(), mSettings( new MySerialAnalyzerSettings() ), mSimulationInitilized( false )
 {
@@ -95,11 +96,12 @@ void MySerialAnalyzer::WorkerThread()
     if( mSerial->GetBitState() == mBitLow )
         mSerial->AdvanceToNextEdge();
 
-    size_t mszBrChange = mSettings->mszBRChange ;
-    size_t mBrIdx = 0 ;
+    BRTime mBRChange = mSettings->mBRChange ;
+    BRTime::iterator iter ;
     
-    U32 *mBitRates = mSettings->mBRChangeBitRate ;
-    float *mTimes = mSettings->mBRChangeTime ;
+    if (!mBRChange.empty()) {
+        iter=mBRChange.begin() ;
+    }
 
     for( ;; )
     {
@@ -110,14 +112,18 @@ void MySerialAnalyzer::WorkerThread()
         // we're now at the beginning of the start bit.  We can start collecting the data.
         U64 frame_starting_sample = mSerial->GetSampleNumber();
 
-        // change birate according to settings
-        if ( (mszBrChange > 0) ) {
-            while ( (mBrIdx < (mszBrChange - 1)) && (frame_starting_sample >= (float) mSampleRateHz * mTimes[mBrIdx+1])  ) {
-                mBrIdx++ ;
+        // change bitrate according to settings
+        if ( !mBRChange.empty() && iter != mBRChange.end()) {
+            // look for last entry in mBrChange smaller than current time
+            while ( iter != std::prev(mBRChange.end(),1) && (frame_starting_sample >= (float) mSampleRateHz * std::next(iter,1)->first)) {
+                iter++ ;
             }
-            mResults->AddMarker(frame_starting_sample, AnalyzerResults::X, mSettings->mInputChannel) ; 
-            mSettings->mBitRate = mBitRates[mBrIdx] ;
-            ComputeSampleOffsets(); 
+            // if different, apply new bitrate
+            if (iter->second != mSettings->mBitRate) {
+                mResults->AddMarker(frame_starting_sample, AnalyzerResults::X, mSettings->mInputChannel) ;
+                mSettings->mBitRate = iter->second ;
+                ComputeSampleOffsets();
+            }
         }
 
         U64 data = 0;

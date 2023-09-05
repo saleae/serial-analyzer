@@ -127,3 +127,8 @@ For debug and release builds, respectively.
 
 A single serial word
 
+## Bitrate change setting
+Sometimes you capture an async signal where the bitrate changes according to certain parameters: for instance a handshake can determine what maximum speed can be used, and then this speed is applied. The 'Bitrate change' field can be used to instruct the analyser to change bitrate at different times in the capture data.
+
+The format of this field is any number of time:bitrate, separated by spaces. For instance if the field contains `0:9600 1.568:115200` it means the beginning of the capture will use 9600 bits/s, and starting at 1.568s, it changes to 115200 bits/s.
+The change will be made at any edge after the entered time; a small X marker will be added to this edge to witness the change.
