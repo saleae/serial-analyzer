@@ -1,21 +1,21 @@
-#ifndef SERIAL_SIMULATION_DATA_GENERATOR
-#define SERIAL_SIMULATION_DATA_GENERATOR
+#ifndef MYSERIAL_SIMULATION_DATA_GENERATOR
+#define MYSERIAL_SIMULATION_DATA_GENERATOR
 
 #include <AnalyzerHelpers.h>
 
-class SerialAnalyzerSettings;
+class MySerialAnalyzerSettings;
 
-class SerialSimulationDataGenerator
+class MySerialSimulationDataGenerator
 {
   public:
-    SerialSimulationDataGenerator();
-    ~SerialSimulationDataGenerator();
+    MySerialSimulationDataGenerator();
+    ~MySerialSimulationDataGenerator();
 
-    void Initialize( U32 simulation_sample_rate, SerialAnalyzerSettings* settings );
+    void Initialize( U32 simulation_sample_rate, MySerialAnalyzerSettings* settings );
     U32 GenerateSimulationData( U64 newest_sample_requested, U32 sample_rate, SimulationChannelDescriptor** simulation_channelss );
 
   protected:
-    SerialAnalyzerSettings* mSettings;
+    MySerialAnalyzerSettings* mSettings;
     U32 mSimulationSampleRateHz;
     BitState mBitLow;
     BitState mBitHigh;

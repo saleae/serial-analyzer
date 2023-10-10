@@ -1,21 +1,21 @@
-#include "SerialAnalyzerResults.h"
+#include "MySerialAnalyzerResults.h"
 #include <AnalyzerHelpers.h>
-#include "SerialAnalyzer.h"
-#include "SerialAnalyzerSettings.h"
+#include "MySerialAnalyzer.h"
+#include "MySerialAnalyzerSettings.h"
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
 
-SerialAnalyzerResults::SerialAnalyzerResults( SerialAnalyzer* analyzer, SerialAnalyzerSettings* settings )
+MySerialAnalyzerResults::MySerialAnalyzerResults( MySerialAnalyzer* analyzer, MySerialAnalyzerSettings* settings )
     : AnalyzerResults(), mSettings( settings ), mAnalyzer( analyzer )
 {
 }
 
-SerialAnalyzerResults::~SerialAnalyzerResults()
+MySerialAnalyzerResults::~MySerialAnalyzerResults()
 {
 }
 
-void SerialAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*channel*/,
+void MySerialAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*channel*/,
                                                 DisplayBase display_base ) // unrefereced vars commented out to remove warnings.
 {
     // we only need to pay attention to 'channel' if we're making bubbles for more than one channel (as set by
@@ -32,7 +32,7 @@ void SerialAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*chan
         parity_error = true;
 
     U32 bits_per_transfer = mSettings->mBitsPerTransfer;
-    if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
+    if( mSettings->mSerialMode != MySerialAnalyzerEnums::Normal )
         bits_per_transfer--;
 
     char number_str[ 128 ];
@@ -91,7 +91,7 @@ void SerialAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*chan
     }
 }
 
-void SerialAnalyzerResults::GenerateExportFile( const char* file, DisplayBase display_base, U32 /*export_type_user_id*/ )
+void MySerialAnalyzerResults::GenerateExportFile( const char* file, DisplayBase display_base, U32 /*export_type_user_id*/ )
 {
     // export_type_user_id is only important if we have more than one export type.
     std::stringstream ss;
@@ -102,7 +102,7 @@ void SerialAnalyzerResults::GenerateExportFile( const char* file, DisplayBase di
 
     void* f = AnalyzerHelpers::StartFile( file );
 
-    if( mSettings->mSerialMode == SerialAnalyzerEnums::Normal )
+    if( mSettings->mSerialMode == MySerialAnalyzerEnums::Normal )
     {
         // Normal case -- not MP mode.
         ss << "Time [s],Value,Parity Error,Framing Error" << std::endl;
@@ -198,7 +198,7 @@ void SerialAnalyzerResults::GenerateExportFile( const char* file, DisplayBase di
     AnalyzerHelpers::EndFile( f );
 }
 
-void SerialAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase display_base )
+void MySerialAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase display_base )
 {
     ClearTabularText();
     Frame frame = GetFrame( frame_index );
@@ -212,7 +212,7 @@ void SerialAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBa
         parity_error = true;
 
     U32 bits_per_transfer = mSettings->mBitsPerTransfer;
-    if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
+    if( mSettings->mSerialMode != MySerialAnalyzerEnums::Normal )
         bits_per_transfer--;
 
     char number_str[ 128 ];
@@ -257,14 +257,14 @@ void SerialAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBa
     }
 }
 
-void SerialAnalyzerResults::GeneratePacketTabularText( U64 /*packet_id*/,
+void MySerialAnalyzerResults::GeneratePacketTabularText( U64 /*packet_id*/,
                                                        DisplayBase /*display_base*/ ) // unrefereced vars commented out to remove warnings.
 {
     ClearResultStrings();
     AddResultString( "not supported" );
 }
 
-void SerialAnalyzerResults::GenerateTransactionTabularText(
+void MySerialAnalyzerResults::GenerateTransactionTabularText(
     U64 /*transaction_id*/, DisplayBase /*display_base*/ ) // unrefereced vars commented out to remove warnings.
 {
     ClearResultStrings();

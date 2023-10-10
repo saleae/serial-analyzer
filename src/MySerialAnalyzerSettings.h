@@ -1,10 +1,11 @@
-#ifndef SERIAL_ANALYZER_SETTINGS
-#define SERIAL_ANALYZER_SETTINGS
+#ifndef MYSERIAL_ANALYZER_SETTINGS
+#define MYSERIAL_ANALYZER_SETTINGS
 
 #include <AnalyzerSettings.h>
 #include <AnalyzerTypes.h>
+#include <map>
 
-namespace SerialAnalyzerEnums
+namespace MySerialAnalyzerEnums
 {
     enum Mode
     {
@@ -14,11 +15,13 @@ namespace SerialAnalyzerEnums
     };
 };
 
-class SerialAnalyzerSettings : public AnalyzerSettings
+typedef std::map<float, U32> BRTime ;
+
+class MySerialAnalyzerSettings : public AnalyzerSettings
 {
   public:
-    SerialAnalyzerSettings();
-    virtual ~SerialAnalyzerSettings();
+    MySerialAnalyzerSettings();
+    virtual ~MySerialAnalyzerSettings();
 
     virtual bool SetSettingsFromInterfaces();
     void UpdateInterfacesFromSettings();
@@ -28,17 +31,25 @@ class SerialAnalyzerSettings : public AnalyzerSettings
 
     Channel mInputChannel;
     U32 mBitRate;
+
+    std::string mBitRateChangeStr; // string containing when to change bitrate, in the form time:bitrate, separated by spaces
+    
+    // this will contain when to change baudrate. Keys: timestamp, value: baudrate to set.
+    BRTime mBRChange ; 
+    
     U32 mBitsPerTransfer;
     AnalyzerEnums::ShiftOrder mShiftOrder;
     double mStopBits;
     AnalyzerEnums::Parity mParity;
     bool mInverted;
     bool mUseAutobaud;
-    SerialAnalyzerEnums::Mode mSerialMode;
+    MySerialAnalyzerEnums::Mode mSerialMode;
 
   protected:
+    void SyncBitRateChange();
     std::auto_ptr<AnalyzerSettingInterfaceChannel> mInputChannelInterface;
     std::auto_ptr<AnalyzerSettingInterfaceInteger> mBitRateInterface;
+    std::auto_ptr<AnalyzerSettingInterfaceText> mBitRateChangeInterface;
     std::auto_ptr<AnalyzerSettingInterfaceNumberList> mBitsPerTransferInterface;
     std::auto_ptr<AnalyzerSettingInterfaceNumberList> mShiftOrderInterface;
     std::auto_ptr<AnalyzerSettingInterfaceNumberList> mStopBitsInterface;
@@ -48,4 +59,4 @@ class SerialAnalyzerSettings : public AnalyzerSettings
     std::auto_ptr<AnalyzerSettingInterfaceNumberList> mSerialModeInterface;
 };
 
-#endif // SERIAL_ANALYZER_SETTINGS
+#endif // MYSERIAL_ANALYZER_SETTINGS

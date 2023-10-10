@@ -1,20 +1,21 @@
-﻿#include "SerialAnalyzer.h"
-#include "SerialAnalyzerSettings.h"
+﻿#include "MySerialAnalyzer.h"
+#include "MySerialAnalyzerSettings.h"
 #include <AnalyzerChannelData.h>
+#include <map>
+#include <iterator>
 
-
-SerialAnalyzer::SerialAnalyzer() : Analyzer2(), mSettings( new SerialAnalyzerSettings() ), mSimulationInitilized( false )
+MySerialAnalyzer::MySerialAnalyzer() : Analyzer2(), mSettings( new MySerialAnalyzerSettings() ), mSimulationInitilized( false )
 {
     SetAnalyzerSettings( mSettings.get() );
     UseFrameV2();
 }
 
-SerialAnalyzer::~SerialAnalyzer()
+MySerialAnalyzer::~MySerialAnalyzer()
 {
     KillThread();
 }
 
-void SerialAnalyzer::ComputeSampleOffsets()
+void MySerialAnalyzer::ComputeSampleOffsets()
 {
     ClockGenerator clock_generator;
     clock_generator.Init( mSettings->mBitRate, mSampleRateHz );
@@ -23,7 +24,7 @@ void SerialAnalyzer::ComputeSampleOffsets()
 
     U32 num_bits = mSettings->mBitsPerTransfer;
 
-    if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
+    if( mSettings->mSerialMode != MySerialAnalyzerEnums::Normal )
         num_bits++;
 
     mSampleOffsets.push_back( clock_generator.AdvanceByHalfPeriod( 1.5 ) ); // point to the center of the 1st bit (past the start bit)
@@ -47,24 +48,24 @@ void SerialAnalyzer::ComputeSampleOffsets()
 }
 
 
-void SerialAnalyzer::SetupResults()
+void MySerialAnalyzer::SetupResults()
 {
     // Unlike the worker thread, this function is called from the GUI thread
     // we need to reset the Results object here because it is exposed for direct access by the GUI, and it can't be deleted from the
     // WorkerThread
 
-    mResults.reset( new SerialAnalyzerResults( this, mSettings.get() ) );
+    mResults.reset( new MySerialAnalyzerResults( this, mSettings.get() ) );
     SetAnalyzerResults( mResults.get() );
     mResults->AddChannelBubblesWillAppearOn( mSettings->mInputChannel );
 }
 
-void SerialAnalyzer::WorkerThread()
+void MySerialAnalyzer::WorkerThread()
 {
     mSampleRateHz = GetSampleRate();
     ComputeSampleOffsets();
 
     U32 bits_per_transfer = mSettings->mBitsPerTransfer;
-    if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
+    if( mSettings->mSerialMode != MySerialAnalyzerEnums::Normal )
         bits_per_transfer++;
 
     // used for HLA byte count, this should not include an extra bit for MP/MDB
@@ -95,6 +96,13 @@ void SerialAnalyzer::WorkerThread()
     if( mSerial->GetBitState() == mBitLow )
         mSerial->AdvanceToNextEdge();
 
+    BRTime mBRChange = mSettings->mBRChange ;
+    BRTime::iterator iter ;
+    
+    if (!mBRChange.empty()) {
+        iter=mBRChange.begin() ;
+    }
+
     for( ;; )
     {
         // we're starting high.  (we'll assume that we're not in the middle of a byte.
@@ -103,6 +111,20 @@ void SerialAnalyzer::WorkerThread()
 
         // we're now at the beginning of the start bit.  We can start collecting the data.
         U64 frame_starting_sample = mSerial->GetSampleNumber();
+
+        // change bitrate according to settings
+        if ( !mBRChange.empty() && iter != mBRChange.end()) {
+            // look for last entry in mBrChange smaller than current time
+            while ( iter != std::prev(mBRChange.end(),1) && (frame_starting_sample >= (float) mSampleRateHz * std::next(iter,1)->first)) {
+                iter++ ;
+            }
+            // if different, apply new bitrate
+            if (iter->second != mSettings->mBitRate) {
+                mResults->AddMarker(frame_starting_sample, AnalyzerResults::X, mSettings->mInputChannel) ;
+                mSettings->mBitRate = iter->second ;
+                ComputeSampleOffsets();
+            }
+        }
 
         U64 data = 0;
         bool parity_error = false;
@@ -125,16 +147,16 @@ void SerialAnalyzer::WorkerThread()
         if( mSettings->mInverted == true )
             data = ( ~data ) & bit_mask;
 
-        if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
+        if( mSettings->mSerialMode != MySerialAnalyzerEnums::Normal )
         {
             // extract the MSB
             U64 msb = data >> ( bits_per_transfer - 1 );
             msb &= 0x1;
-            if( mSettings->mSerialMode == SerialAnalyzerEnums::MpModeMsbOneMeansAddress )
+            if( mSettings->mSerialMode == MySerialAnalyzerEnums::MpModeMsbOneMeansAddress )
             {
                 mp_is_address = msb == 0x1;
             }
-            else if( mSettings->mSerialMode == SerialAnalyzerEnums::MpModeMsbZeroMeansAddress )
+            else if( mSettings->mSerialMode == MySerialAnalyzerEnums::MpModeMsbZeroMeansAddress )
             {
                 mp_is_address = msb == 0x0;
             }
@@ -248,7 +270,7 @@ void SerialAnalyzer::WorkerThread()
             framev2.AddString( "error", "framing" );
         }
 
-        if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
+        if( mSettings->mSerialMode != MySerialAnalyzerEnums::Normal )
         {
             framev2.AddBoolean( "address", mp_is_address );
         }
@@ -268,7 +290,7 @@ void SerialAnalyzer::WorkerThread()
     }
 }
 
-bool SerialAnalyzer::NeedsRerun()
+bool MySerialAnalyzer::NeedsRerun()
 {
     if( mSettings->mUseAutobaud == false )
         return false;
@@ -309,7 +331,7 @@ bool SerialAnalyzer::NeedsRerun()
     }
 }
 
-U32 SerialAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate,
+U32 MySerialAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate,
                                             SimulationChannelDescriptor** simulation_channels )
 {
     if( mSimulationInitilized == false )
@@ -321,24 +343,24 @@ U32 SerialAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device
     return mSimulationDataGenerator.GenerateSimulationData( minimum_sample_index, device_sample_rate, simulation_channels );
 }
 
-U32 SerialAnalyzer::GetMinimumSampleRateHz()
+U32 MySerialAnalyzer::GetMinimumSampleRateHz()
 {
     return mSettings->mBitRate * 4;
 }
 
-const char* SerialAnalyzer::GetAnalyzerName() const
+const char* MySerialAnalyzer::GetAnalyzerName() const
 {
-    return "Async Serial";
+    return "My Async Serial";
 }
 
 const char* GetAnalyzerName()
 {
-    return "Async Serial";
+    return "My Async Serial";
 }
 
 Analyzer* CreateAnalyzer()
 {
-    return new SerialAnalyzer();
+    return new MySerialAnalyzer();
 }
 
 void DestroyAnalyzer( Analyzer* analyzer )

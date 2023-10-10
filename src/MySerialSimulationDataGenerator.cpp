@@ -1,15 +1,15 @@
-#include "SerialSimulationDataGenerator.h"
-#include "SerialAnalyzerSettings.h"
+#include "MySerialSimulationDataGenerator.h"
+#include "MySerialAnalyzerSettings.h"
 
-SerialSimulationDataGenerator::SerialSimulationDataGenerator()
+MySerialSimulationDataGenerator::MySerialSimulationDataGenerator()
 {
 }
 
-SerialSimulationDataGenerator::~SerialSimulationDataGenerator()
+MySerialSimulationDataGenerator::~MySerialSimulationDataGenerator()
 {
 }
 
-void SerialSimulationDataGenerator::Initialize( U32 simulation_sample_rate, SerialAnalyzerSettings* settings )
+void MySerialSimulationDataGenerator::Initialize( U32 simulation_sample_rate, MySerialAnalyzerSettings* settings )
 {
     mSimulationSampleRateHz = simulation_sample_rate;
     mSettings = settings;
@@ -45,14 +45,14 @@ void SerialSimulationDataGenerator::Initialize( U32 simulation_sample_rate, Seri
         mNumBitsMask |= 0x1;
     }
 
-    if( mSettings->mSerialMode == SerialAnalyzerEnums::MpModeMsbOneMeansAddress )
+    if( mSettings->mSerialMode == MySerialAnalyzerEnums::MpModeMsbOneMeansAddress )
         mMpModeAddressMask = 0x1ull << ( mSettings->mBitsPerTransfer );
 
-    if( mSettings->mSerialMode == SerialAnalyzerEnums::MpModeMsbZeroMeansAddress )
+    if( mSettings->mSerialMode == MySerialAnalyzerEnums::MpModeMsbZeroMeansAddress )
         mMpModeDataMask = 0x1ull << ( mSettings->mBitsPerTransfer );
 }
 
-U32 SerialSimulationDataGenerator::GenerateSimulationData( U64 largest_sample_requested, U32 sample_rate,
+U32 MySerialSimulationDataGenerator::GenerateSimulationData( U64 largest_sample_requested, U32 sample_rate,
                                                            SimulationChannelDescriptor** simulation_channels )
 {
     U64 adjusted_largest_sample_requested =
@@ -60,7 +60,7 @@ U32 SerialSimulationDataGenerator::GenerateSimulationData( U64 largest_sample_re
 
     while( mSerialSimulationData.GetCurrentSampleNumber() < adjusted_largest_sample_requested )
     {
-        if( mSettings->mSerialMode == SerialAnalyzerEnums::Normal )
+        if( mSettings->mSerialMode == MySerialAnalyzerEnums::Normal )
         {
             CreateSerialByte( mValue++ );
 
@@ -98,7 +98,7 @@ U32 SerialSimulationDataGenerator::GenerateSimulationData( U64 largest_sample_re
     return 1; // we are retuning the size of the SimulationChannelDescriptor array.  In our case, the "array" is length 1.
 }
 
-void SerialSimulationDataGenerator::CreateSerialByte( U64 value )
+void MySerialSimulationDataGenerator::CreateSerialByte( U64 value )
 {
     // assume we start high
 
@@ -109,7 +109,7 @@ void SerialSimulationDataGenerator::CreateSerialByte( U64 value )
         value = ~value;
 
     U32 num_bits = mSettings->mBitsPerTransfer;
-    if( mSettings->mSerialMode != SerialAnalyzerEnums::Normal )
+    if( mSettings->mSerialMode != MySerialAnalyzerEnums::Normal )
         num_bits++;
 
     BitExtractor bit_extractor( value, mSettings->mShiftOrder, num_bits );

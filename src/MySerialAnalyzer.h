@@ -1,16 +1,16 @@
-#ifndef SERIAL_ANALYZER_H
-#define SERIAL_ANALYZER_H
+#ifndef MYSERIAL_ANALYZER_H
+#define MYSERIAL_ANALYZER_H
 
 #include <Analyzer.h>
-#include "SerialAnalyzerResults.h"
-#include "SerialSimulationDataGenerator.h"
+#include "MySerialAnalyzerResults.h"
+#include "MySerialSimulationDataGenerator.h"
 
-class SerialAnalyzerSettings;
-class SerialAnalyzer : public Analyzer2
+class MySerialAnalyzerSettings;
+class MySerialAnalyzer : public Analyzer2
 {
   public:
-    SerialAnalyzer();
-    virtual ~SerialAnalyzer();
+    MySerialAnalyzer();
+    virtual ~MySerialAnalyzer();
     virtual void SetupResults();
     virtual void WorkerThread();
 
@@ -23,17 +23,17 @@ class SerialAnalyzer : public Analyzer2
 
 #pragma warning( push )
 #pragma warning(                                                                                                                           \
-    disable : 4251 ) // warning C4251: 'SerialAnalyzer::<...>' : class <...> needs to have dll-interface to be used by clients of class
+    disable : 4251 ) // warning C4251: 'MySerialAnalyzer::<...>' : class <...> needs to have dll-interface to be used by clients of class
 
   protected: // functions
     void ComputeSampleOffsets();
 
   protected: // vars
-    std::auto_ptr<SerialAnalyzerSettings> mSettings;
-    std::auto_ptr<SerialAnalyzerResults> mResults;
+    std::auto_ptr<MySerialAnalyzerSettings> mSettings;
+    std::auto_ptr<MySerialAnalyzerResults> mResults;
     AnalyzerChannelData* mSerial;
 
-    SerialSimulationDataGenerator mSimulationDataGenerator;
+    MySerialSimulationDataGenerator mSimulationDataGenerator;
     bool mSimulationInitilized;
 
     // Serial analysis vars:
@@ -52,4 +52,4 @@ extern "C" ANALYZER_EXPORT const char* __cdecl GetAnalyzerName();
 extern "C" ANALYZER_EXPORT Analyzer* __cdecl CreateAnalyzer();
 extern "C" ANALYZER_EXPORT void __cdecl DestroyAnalyzer( Analyzer* analyzer );
 
-#endif // SERIAL_ANALYZER_H
+#endif // MYSERIAL_ANALYZER_H

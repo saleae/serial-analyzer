@@ -1,5 +1,5 @@
-#ifndef SERIAL_ANALYZER_RESULTS
-#define SERIAL_ANALYZER_RESULTS
+#ifndef MYSERIAL_ANALYZER_RESULTS
+#define MYSERIAL_ANALYZER_RESULTS
 
 #include <AnalyzerResults.h>
 
@@ -7,14 +7,14 @@
 #define PARITY_ERROR_FLAG ( 1 << 1 )
 #define MP_MODE_ADDRESS_FLAG ( 1 << 2 )
 
-class SerialAnalyzer;
-class SerialAnalyzerSettings;
+class MySerialAnalyzer;
+class MySerialAnalyzerSettings;
 
-class SerialAnalyzerResults : public AnalyzerResults
+class MySerialAnalyzerResults : public AnalyzerResults
 {
   public:
-    SerialAnalyzerResults( SerialAnalyzer* analyzer, SerialAnalyzerSettings* settings );
-    virtual ~SerialAnalyzerResults();
+    MySerialAnalyzerResults( MySerialAnalyzer* analyzer, MySerialAnalyzerSettings* settings );
+    virtual ~MySerialAnalyzerResults();
 
     virtual void GenerateBubbleText( U64 frame_index, Channel& channel, DisplayBase display_base );
     virtual void GenerateExportFile( const char* file, DisplayBase display_base, U32 export_type_user_id );
@@ -25,8 +25,8 @@ class SerialAnalyzerResults : public AnalyzerResults
 
   protected: // functions
   protected: // vars
-    SerialAnalyzerSettings* mSettings;
-    SerialAnalyzer* mAnalyzer;
+    MySerialAnalyzerSettings* mSettings;
+    MySerialAnalyzer* mAnalyzer;
 };
 
-#endif // SERIAL_ANALYZER_RESULTS
+#endif // MYSERIAL_ANALYZER_RESULTS

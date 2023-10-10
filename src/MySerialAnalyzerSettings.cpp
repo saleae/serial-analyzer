@@ -1,12 +1,13 @@
-#include "SerialAnalyzerSettings.h"
+#include "MySerialAnalyzerSettings.h"
 
 #include <AnalyzerHelpers.h>
 #include <sstream>
 #include <cstring>
+#include <vector>
 
 #pragma warning( disable : 4800 ) // warning C4800: 'U32' : forcing value to bool 'true' or 'false' (performance warning)
 
-SerialAnalyzerSettings::SerialAnalyzerSettings()
+MySerialAnalyzerSettings::MySerialAnalyzerSettings()
     : mInputChannel( UNDEFINED_CHANNEL ),
       mBitRate( 9600 ),
       mBitsPerTransfer( 8 ),
@@ -15,10 +16,10 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
       mShiftOrder( AnalyzerEnums::LsbFirst ),
       mInverted( false ),
       mUseAutobaud( false ),
-      mSerialMode( SerialAnalyzerEnums::Normal )
+      mSerialMode( MySerialAnalyzerEnums::Normal )
 {
     mInputChannelInterface.reset( new AnalyzerSettingInterfaceChannel() );
-    mInputChannelInterface->SetTitleAndTooltip( "Input Channel", "Standard Async Serial" );
+    mInputChannelInterface->SetTitleAndTooltip( "Input Channel", "My Standard Async Serial" );
     mInputChannelInterface->SetChannel( mInputChannel );
 
     mBitRateInterface.reset( new AnalyzerSettingInterfaceInteger() );
@@ -26,6 +27,10 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
     mBitRateInterface->SetMax( 100000000 );
     mBitRateInterface->SetMin( 1 );
     mBitRateInterface->SetInteger( mBitRate );
+
+    mBitRateChangeInterface.reset(new AnalyzerSettingInterfaceText() );
+    mBitRateChangeInterface->SetTitleAndTooltip( "Bitrate changes", "Timestamp:Bitrate, separated by spaces." );
+    mBitRateChangeInterface->SetTextType(AnalyzerSettingInterfaceText::NormalText);
 
     mUseAutobaudInterface.reset( new AnalyzerSettingInterfaceBool() );
     mUseAutobaudInterface->SetTitleAndTooltip(
@@ -94,15 +99,16 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
 
     mSerialModeInterface.reset( new AnalyzerSettingInterfaceNumberList() );
     mSerialModeInterface->SetTitleAndTooltip( "Mode", "" );
-    mSerialModeInterface->AddNumber( SerialAnalyzerEnums::Normal, "Normal", "" );
-    mSerialModeInterface->AddNumber( SerialAnalyzerEnums::MpModeMsbZeroMeansAddress, "MP - Address indicated by MSB=0",
+    mSerialModeInterface->AddNumber( MySerialAnalyzerEnums::Normal, "Normal", "" );
+    mSerialModeInterface->AddNumber( MySerialAnalyzerEnums::MpModeMsbZeroMeansAddress, "MP - Address indicated by MSB=0",
                                      "Multi-processor, 9-bit serial" );
-    mSerialModeInterface->AddNumber( SerialAnalyzerEnums::MpModeMsbOneMeansAddress, "MDB - Address indicated by MSB=1 (TX only)",
+    mSerialModeInterface->AddNumber( MySerialAnalyzerEnums::MpModeMsbOneMeansAddress, "MDB - Address indicated by MSB=1 (TX only)",
                                      "Multi-drop, 9-bit serial" );
     mSerialModeInterface->SetNumber( mSerialMode );
 
     AddInterface( mInputChannelInterface.get() );
     AddInterface( mBitRateInterface.get() );
+    AddInterface( mBitRateChangeInterface.get() );
     AddInterface( mBitsPerTransferInterface.get() );
     AddInterface( mStopBitsInterface.get() );
     AddInterface( mParityInterface.get() );
@@ -119,14 +125,66 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
     AddChannel( mInputChannel, "Serial", false );
 }
 
-SerialAnalyzerSettings::~SerialAnalyzerSettings()
+MySerialAnalyzerSettings::~MySerialAnalyzerSettings()
 {
 }
 
-bool SerialAnalyzerSettings::SetSettingsFromInterfaces()
+/*
+ * Fills mBRChange map according to mBitRateChange string contents
+ * eg: if mBitRatechange contains "0:9600 7.765:250000"
+ * mBRChange will contain { 0 => 9600, 7.765 => 250000}
+ */
+void MySerialAnalyzerSettings::SyncBitRateChange()
+{
+    mBRChange.clear() ;
+
+    if (mBitRateChangeStr.empty()) return ;
+   
+    std::string s=mBitRateChangeStr;
+    std::string delimiter = " " ;
+    std::vector<std::string> token;
+    
+    size_t pos = 0 ;
+
+    float time ;
+    U32 bitrate ;
+
+    // parse string separated by spaces, and fill array of found tokens
+    while ((pos = s.find(delimiter)) != std::string::npos) {
+        std::string t=s.substr(0,pos);
+        // std::cout << "token:{" << t << "}" << std::endl ;
+        s.erase(0,pos+delimiter.length());
+        
+        if (t.empty()) { // multiple spaces
+            continue ;
+        }
+
+        token.push_back(t) ;
+    }
+
+    // remaining of the string after last seen separator
+    if (!s.empty()) {
+        token.push_back(s) ;
+    }
+
+    // parse every token and fill mBRChange
+    for (const std::string&t : token) {
+        if (sscanf(t.c_str(),"%f:%u",&time, &bitrate) != 2) { // parsing error
+            // std::cout << "parsing error {" << token[mszBRChange] << "}" << std::endl ;
+            //TODO: display error to user.
+            continue;
+        }
+        
+        mBRChange[time] = bitrate ;
+    }
+
+    return ;
+}
+
+bool MySerialAnalyzerSettings::SetSettingsFromInterfaces()
 {
     if( AnalyzerEnums::Parity( U32( mParityInterface->GetNumber() ) ) != AnalyzerEnums::None )
-        if( SerialAnalyzerEnums::Mode( U32( mSerialModeInterface->GetNumber() ) ) != SerialAnalyzerEnums::Normal )
+        if( MySerialAnalyzerEnums::Mode( U32( mSerialModeInterface->GetNumber() ) ) != MySerialAnalyzerEnums::Normal )
         {
             SetErrorText( "Sorry, but we don't support using parity at the same time as MP mode." );
             return false;
@@ -134,13 +192,16 @@ bool SerialAnalyzerSettings::SetSettingsFromInterfaces()
 
     mInputChannel = mInputChannelInterface->GetChannel();
     mBitRate = mBitRateInterface->GetInteger();
+    mBitRateChangeStr = mBitRateChangeInterface->GetText();
+    SyncBitRateChange() ;
+
     mBitsPerTransfer = U32( mBitsPerTransferInterface->GetNumber() );
     mStopBits = mStopBitsInterface->GetNumber();
     mParity = AnalyzerEnums::Parity( U32( mParityInterface->GetNumber() ) );
     mShiftOrder = AnalyzerEnums::ShiftOrder( U32( mShiftOrderInterface->GetNumber() ) );
     mInverted = bool( U32( mInvertedInterface->GetNumber() ) );
     mUseAutobaud = mUseAutobaudInterface->GetValue();
-    mSerialMode = SerialAnalyzerEnums::Mode( U32( mSerialModeInterface->GetNumber() ) );
+    mSerialMode = MySerialAnalyzerEnums::Mode( U32( mSerialModeInterface->GetNumber() ) );
 
     ClearChannels();
     AddChannel( mInputChannel, "Serial", true );
@@ -148,10 +209,11 @@ bool SerialAnalyzerSettings::SetSettingsFromInterfaces()
     return true;
 }
 
-void SerialAnalyzerSettings::UpdateInterfacesFromSettings()
+void MySerialAnalyzerSettings::UpdateInterfacesFromSettings()
 {
     mInputChannelInterface->SetChannel( mInputChannel );
     mBitRateInterface->SetInteger( mBitRate );
+    mBitRateChangeInterface->SetText( mBitRateChangeStr.c_str()) ;
     mBitsPerTransferInterface->SetNumber( mBitsPerTransfer );
     mStopBitsInterface->SetNumber( mStopBits );
     mParityInterface->SetNumber( mParity );
@@ -161,15 +223,15 @@ void SerialAnalyzerSettings::UpdateInterfacesFromSettings()
     mSerialModeInterface->SetNumber( mSerialMode );
 }
 
-void SerialAnalyzerSettings::LoadSettings( const char* settings )
+void MySerialAnalyzerSettings::LoadSettings( const char* settings )
 {
     SimpleArchive text_archive;
     text_archive.SetString( settings );
 
     const char* name_string; // the first thing in the archive is the name of the protocol analyzer that the data belongs to.
     text_archive >> &name_string;
-    if( strcmp( name_string, "SaleaeAsyncSerialAnalyzer" ) != 0 )
-        AnalyzerHelpers::Assert( "SaleaeAsyncSerialAnalyzer: Provided with a settings string that doesn't belong to us;" );
+    if( strcmp( name_string, "SaleaeAsyncMySerialAnalyzer" ) != 0 )
+        AnalyzerHelpers::Assert( "SaleaeAsyncMySerialAnalyzer: Provided with a settings string that doesn't belong to us;" );
 
     text_archive >> mInputChannel;
     text_archive >> mBitRate;
@@ -185,9 +247,15 @@ void SerialAnalyzerSettings::LoadSettings( const char* settings )
     if( text_archive >> use_autobaud )
         mUseAutobaud = use_autobaud;
 
-    SerialAnalyzerEnums::Mode mode;
+    MySerialAnalyzerEnums::Mode mode;
     if( text_archive >> *( U32* )&mode )
         mSerialMode = mode;
+
+    const char * bitratechange_string ;
+    if ( text_archive >> &bitratechange_string ) {
+        mBitRateChangeStr = name_string ;
+        SyncBitRateChange() ;
+    }
 
     ClearChannels();
     AddChannel( mInputChannel, "Serial", true );
@@ -195,11 +263,11 @@ void SerialAnalyzerSettings::LoadSettings( const char* settings )
     UpdateInterfacesFromSettings();
 }
 
-const char* SerialAnalyzerSettings::SaveSettings()
+const char* MySerialAnalyzerSettings::SaveSettings()
 {
     SimpleArchive text_archive;
 
-    text_archive << "SaleaeAsyncSerialAnalyzer";
+    text_archive << "SaleaeAsyncMySerialAnalyzer";
     text_archive << mInputChannel;
     text_archive << mBitRate;
     text_archive << mBitsPerTransfer;
@@ -211,6 +279,7 @@ const char* SerialAnalyzerSettings::SaveSettings()
     text_archive << mUseAutobaud;
 
     text_archive << mSerialMode;
+    text_archive << mBitRateChangeStr.c_str() ;
 
     return SetReturnString( text_archive.GetString() );
 }
