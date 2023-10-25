@@ -1,13 +1,9 @@
 #include "SerialSimulationDataGenerator.h"
 #include "SerialAnalyzerSettings.h"
 
-SerialSimulationDataGenerator::SerialSimulationDataGenerator()
-{
-}
+SerialSimulationDataGenerator::SerialSimulationDataGenerator() = default;
 
-SerialSimulationDataGenerator::~SerialSimulationDataGenerator()
-{
-}
+SerialSimulationDataGenerator::~SerialSimulationDataGenerator() = default;
 
 void SerialSimulationDataGenerator::Initialize( U32 simulation_sample_rate, SerialAnalyzerSettings* settings )
 {
@@ -75,7 +71,7 @@ U32 SerialSimulationDataGenerator::GenerateSimulationData( U64 largest_sample_re
             {
                 mSerialSimulationData.Advance( mClockGenerator.AdvanceByHalfPeriod( 2.0 ) ); // insert 2 bit-periods of idle
                 CreateSerialByte( ( mValue++ & mNumBitsMask ) | mMpModeDataMask );
-            };
+            }
 
             mSerialSimulationData.Advance( mClockGenerator.AdvanceByHalfPeriod( 20.0 ) ); // insert 20 bit-periods of idle
 
@@ -86,7 +82,7 @@ U32 SerialSimulationDataGenerator::GenerateSimulationData( U64 largest_sample_re
             {
                 mSerialSimulationData.Advance( mClockGenerator.AdvanceByHalfPeriod( 2.0 ) ); // insert 2 bit-periods of idle
                 CreateSerialByte( ( mValue++ & mNumBitsMask ) | mMpModeDataMask );
-            };
+            }
 
             mSerialSimulationData.Advance( mClockGenerator.AdvanceByHalfPeriod( 20.0 ) ); // insert 20 bit-periods of idle
         }
@@ -141,6 +137,6 @@ void SerialSimulationDataGenerator::CreateSerialByte( U64 value )
 
     mSerialSimulationData.TransitionIfNeeded( mBitHigh ); // we need to end high
 
-    // lets pad the end a bit for the stop bit:
+    // let's pad the end a bit for the stop bit:
     mSerialSimulationData.Advance( mClockGenerator.AdvanceByHalfPeriod( mSettings->mStopBits ) );
 }

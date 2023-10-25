@@ -4,6 +4,8 @@
 #include <AnalyzerSettings.h>
 #include <AnalyzerTypes.h>
 
+#include <memory>
+
 namespace SerialAnalyzerEnums
 {
     enum Mode
@@ -12,7 +14,7 @@ namespace SerialAnalyzerEnums
         MpModeMsbZeroMeansAddress,
         MpModeMsbOneMeansAddress
     };
-};
+}
 
 class SerialAnalyzerSettings : public AnalyzerSettings
 {
@@ -37,15 +39,15 @@ class SerialAnalyzerSettings : public AnalyzerSettings
     SerialAnalyzerEnums::Mode mSerialMode;
 
   protected:
-    std::auto_ptr<AnalyzerSettingInterfaceChannel> mInputChannelInterface;
-    std::auto_ptr<AnalyzerSettingInterfaceInteger> mBitRateInterface;
-    std::auto_ptr<AnalyzerSettingInterfaceNumberList> mBitsPerTransferInterface;
-    std::auto_ptr<AnalyzerSettingInterfaceNumberList> mShiftOrderInterface;
-    std::auto_ptr<AnalyzerSettingInterfaceNumberList> mStopBitsInterface;
-    std::auto_ptr<AnalyzerSettingInterfaceNumberList> mParityInterface;
-    std::auto_ptr<AnalyzerSettingInterfaceNumberList> mInvertedInterface;
-    std::auto_ptr<AnalyzerSettingInterfaceBool> mUseAutobaudInterface;
-    std::auto_ptr<AnalyzerSettingInterfaceNumberList> mSerialModeInterface;
+    std::unique_ptr<AnalyzerSettingInterfaceChannel> mInputChannelInterface;
+    std::unique_ptr<AnalyzerSettingInterfaceInteger> mBitRateInterface;
+    std::unique_ptr<AnalyzerSettingInterfaceNumberList> mBitsPerTransferInterface;
+    std::unique_ptr<AnalyzerSettingInterfaceNumberList> mShiftOrderInterface;
+    std::unique_ptr<AnalyzerSettingInterfaceNumberList> mStopBitsInterface;
+    std::unique_ptr<AnalyzerSettingInterfaceNumberList> mParityInterface;
+    std::unique_ptr<AnalyzerSettingInterfaceNumberList> mInvertedInterface;
+    std::unique_ptr<AnalyzerSettingInterfaceBool> mUseAutobaudInterface;
+    std::unique_ptr<AnalyzerSettingInterfaceNumberList> mSerialModeInterface;
 };
 
 #endif // SERIAL_ANALYZER_SETTINGS
