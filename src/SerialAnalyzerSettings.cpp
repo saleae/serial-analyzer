@@ -25,7 +25,7 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
     mBitRateInterface->SetTitleAndTooltip( "Bit Rate (Bits/s)", "Specify the bit rate in bits per second." );
     mBitRateInterface->SetMax( 100000000 );
     mBitRateInterface->SetMin( 1 );
-    mBitRateInterface->SetInteger( mBitRate );
+    mBitRateInterface->SetInteger( static_cast<int>( mBitRate ) );
 
     mUseAutobaudInterface.reset( new AnalyzerSettingInterfaceBool() );
     mUseAutobaudInterface->SetTitleAndTooltip(
@@ -119,9 +119,7 @@ SerialAnalyzerSettings::SerialAnalyzerSettings()
     AddChannel( mInputChannel, "Serial", false );
 }
 
-SerialAnalyzerSettings::~SerialAnalyzerSettings()
-{
-}
+SerialAnalyzerSettings::~SerialAnalyzerSettings() = default;
 
 bool SerialAnalyzerSettings::SetSettingsFromInterfaces()
 {
@@ -151,7 +149,7 @@ bool SerialAnalyzerSettings::SetSettingsFromInterfaces()
 void SerialAnalyzerSettings::UpdateInterfacesFromSettings()
 {
     mInputChannelInterface->SetChannel( mInputChannel );
-    mBitRateInterface->SetInteger( mBitRate );
+    mBitRateInterface->SetInteger( static_cast<int>( mBitRate ) );
     mBitsPerTransferInterface->SetNumber( mBitsPerTransfer );
     mStopBitsInterface->SetNumber( mStopBits );
     mParityInterface->SetNumber( mParity );
@@ -179,8 +177,8 @@ void SerialAnalyzerSettings::LoadSettings( const char* settings )
     text_archive >> *( U32* )&mShiftOrder;
     text_archive >> mInverted;
 
-    // check to make sure loading it actual works befor assigning the result -- do this when adding settings to an anylzer which has been
-    // previously released.
+    // check to make sure loading it actually works before assigning the result
+    // do this when adding settings to an analyzer which has been previously released.
     bool use_autobaud;
     if( text_archive >> use_autobaud )
         mUseAutobaud = use_autobaud;
